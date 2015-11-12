@@ -1,16 +1,19 @@
 {
   "name": "hmm_logo",
-  "version": "0.0.0",
-  "description": "",
-  "main": "hmm_logo.js",
+  "version": "0.0.1",
+  "description": "Component to generate logos from HHM alignments (skylign)",
+  "main": "src/main.js",
   "dependencies": {
-    "grunt": "~0.4.4"
+    "grunt": "~0.4.4",
+    "jquery": "^2.1.4"
   },
   "devDependencies": {
-    "grunt": "~0.4.4"
+    "chai": "^3.4.1",
+    "grunt": "~0.4.4",
+    "mocha": "^2.3.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": "",
   "author": "",

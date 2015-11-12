@@ -602,6 +602,13 @@
       context.strokeStyle = color;
       context.stroke();
     }
+    function draw_box(context, x, y, col_width, color) {
+      color = color || "rgba(100,100,100, 0.5)";
+      context.fillStyle = color;
+      context.strokeStyle = "#444444";
+      context.fillRect(x, y, col_width, 10);
+      context.strokeRect(x, y, col_width, 10);
+    }
 
     function draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill) {
       context.font = fontsize + "px Arial";
@@ -827,6 +834,7 @@
             } else {
               this.render_with_rects(split_start, split_end, i);
             }
+            this.render_boxes(split_start, split_end, i)
             this.rendered[i] = 1;
           }
         }
@@ -1054,6 +1062,7 @@
 
         x += this.zoomed_column;
         column_num++;
+
       }
 
 
@@ -1181,7 +1190,28 @@
       }
 
     };
+    this.render_boxes = function (start, end, context_num, borders) {
+      var x = 0,
+          column_num = start,
+          column_label = null,
+          i = 0,
+          top_height = Math.abs(this.data.max_height),
+          bottom_height = Math.abs(this.data.min_height_obs),
+          total_height = top_height + bottom_height,
+          top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height),
+      //convert % to pixels
+          top_pix_height = Math.round((this.info_content_height * top_percentage) / 100),
+          bottom_pix_height = this.info_content_height - top_pix_height,
+          mod = 10;
 
+      for (i = start; i <= end; i++) {
+        if (this.data.boxes.indexOf(i)>-1)
+          draw_box(this.contexts[context_num], x+1, 20,  this.zoomed_column-2);
+        x += this.zoomed_column;
+        column_num++;
+      }
+
+    };
     this.toggle_colorscheme = function (scheme) {
       // work out the current column we are on so we can return there
       var col_total = this.current_column();
