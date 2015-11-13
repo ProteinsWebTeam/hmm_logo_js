@@ -440,6 +440,7 @@
       this.zoom_enabled = true;
     }
 
+
     this.colorscheme = options.colorscheme || 'default';
 
     // never show the alignment coordinates by default as that would get
@@ -453,6 +454,10 @@
     this.end = options.end || this.data.height_arr.length;
     this.zoom = parseFloat(options.zoom) || 0.4;
     this.default_zoom = this.zoom;
+
+    this.active_sites_sources = options.active_sites_sources || null;
+    this.show_active_sites = false;
+    this.active_sites = [];
 
     // turn off the insert rows if the hmm used the observed or weighted processing flags.
     if (this.data.processing && /^observed|weighted/.test(this.data.processing)) {
@@ -718,7 +723,7 @@
         start = null,
         i = 0;
 
-      if (target === this.previous_target) {
+      if (target === this.previous_target && !this.show_active_sites) {
         return;
       }
 
@@ -834,8 +839,11 @@
             } else {
               this.render_with_rects(split_start, split_end, i);
             }
-            this.render_boxes(split_start, split_end, i)
             this.rendered[i] = 1;
+
+            if (this.show_active_sites) {
+              this.render_active_sites(split_start, split_end, i);
+            }
           }
         }
 
@@ -1190,7 +1198,7 @@
       }
 
     };
-    this.render_boxes = function (start, end, context_num, borders) {
+    this.render_active_sites = function (start, end, context_num, borders) {
       var x = 0,
           column_num = start,
           column_label = null,
@@ -1205,7 +1213,7 @@
           mod = 10;
 
       for (i = start; i <= end; i++) {
-        if (this.data.boxes.indexOf(i)>-1)
+        if (this.active_sites_residues.indexOf(i)>-1)
           draw_box(this.contexts[context_num], x+1, 20,  this.zoomed_column-2);
         x += this.zoomed_column;
         column_num++;
@@ -1402,7 +1410,7 @@
 
       var zoom = options.zoom || 0.4,
         form = $('<form class="logo_form"><fieldset><label for="position">Column number</label>' +
-          '<input type="text" name="position" class="logo_position"></input>' +
+          '<input type="text" name="position" class="logo_position" />' +
           '<button class="button logo_change">Go</button></fieldset>' +
           '</form>'),
         controls = $('<div class="logo_controls">'),
@@ -1485,9 +1493,10 @@
 
       if (logo.data.ali_map) {
         var mod_checked = null,
-          ali_checked = null,
-          mod_help = '',
-          ali_help = '';
+            ali_checked = null,
+            mod_help = '',
+            ali_help = '',
+            familiy_accession = '';
 
         if (logo.display_ali_map === 0) {
           mod_checked = 'checked';
@@ -1511,6 +1520,22 @@
           '</label>' +
           '</fieldset>';
         settings.append(ali_controls);
+
+        if (logo.active_sites_sources!=null && typeof logo.active_sites_sources == "object") {
+          var active_sites = '<fieldset><legend>ActiveSites</legend>' +
+              '<label>Source: <select name="member_db" class="logo_ali_map">';
+          for (var key in logo.active_sites_sources) {
+            active_sites += '<option value="'+key+'">'+key+'</option> ';
+          }
+          active_sites += '</select></label> ' + // + mod_help +
+              '</br>' +
+              '<label>Accession number: ' +
+              '   <input type="text" name="familiy_accession" class="logo_ali_map" value="' + familiy_accession + '"/>' +
+              '</label><br/><button id="active_sites">Get Active Sites</button>' +
+              '</fieldset>';
+
+          settings.append(active_sites);
+        }
       }
 
       if (settings.children().length > 0) {
@@ -1541,6 +1566,30 @@
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.change_zoom({'distance': 0.1, 'direction': '+'});
+      });
+
+      $(this).find('#active_sites').bind('click', function (e) {
+        e.preventDefault();
+        var hmm_logo = logo;
+        var source = $("select[name=member_db]").val(),
+            url = hmm_logo.active_sites_sources[source],
+            acc= $("input[name=familiy_accession]").val();
+        if (""!=acc.trim()) {
+          url = url.replace("[ACCESSION]", acc);
+          $.getJSON(url,function(data){
+            hmm_logo.active_sites = data;
+            hmm_logo.active_sites_residues = [];
+            for (var i in data){
+              hmm_logo.active_sites_residues = hmm_logo.active_sites_residues.concat(data[i].residues);
+            }
+          });
+          hmm_logo.show_active_sites = true;
+          //Refreshing!!
+          hmm_logo.rendered = [];
+          $(this.called_on).find('.logo_yaxis').remove();
+          hmm_logo.render_y_axis_label();
+          hmm_logo.scrollme.reflow();
+        }
       });
 
       $(this).find('.logo_zoomout').bind('click', function (e) {
