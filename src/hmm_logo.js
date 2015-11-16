@@ -13,6 +13,12 @@
 
   // checking for canvas support and caching result
   var canv_support = null;
+
+
+  var feature_height = 10,
+      margin_to_features = 10,
+      padding_between_tracks=4;
+
   function canvasSupport() {
     if (!canv_support) {
       var elem = document.createElement('canvas');
@@ -458,6 +464,7 @@
     this.active_sites_sources = options.active_sites_sources || null;
     this.show_active_sites = false;
     this.active_sites = [];
+    this.multiple_tracks=false;
 
     // turn off the insert rows if the hmm used the observed or weighted processing flags.
     if (this.data.processing && /^observed|weighted/.test(this.data.processing)) {
@@ -607,12 +614,22 @@
       context.strokeStyle = color;
       context.stroke();
     }
-    function draw_box(context, x, y, col_width, color) {
-      color = color || "rgba(100,100,100, 0.5)";
+    function draw_box(context, x, y, col_width, color,border) {
+      color = color || "rgba(100,100,100, 0.2)";
+      border = border || "rgba(100,100,100, 0.8)";
       context.fillStyle = color;
-      context.strokeStyle = "#444444";
-      context.fillRect(x, y, col_width, 10);
-      context.strokeRect(x, y, col_width, 10);
+      context.strokeStyle = border;
+      context.fillRect(x, y, col_width, feature_height);
+      context.strokeRect(x, y, col_width, feature_height);
+    }
+    function draw_line(context, x1, y1, x2, y2, color) {
+      color = color || "rgba(100,100,100, 0.8)";
+      context.beginPath();
+      context.moveTo(x1, y1);
+      context.lineTo(x2, y2);
+      context.lineWidth = 1;
+      context.strokeStyle = color;
+      context.stroke();
     }
 
     function draw_rect_with_text(context, x, y, text, fontsize, col_width, fill, textfill) {
@@ -723,7 +740,7 @@
         start = null,
         i = 0;
 
-      if (target === this.previous_target && !this.show_active_sites) {
+      if (target === this.previous_target) {
         return;
       }
 
@@ -841,9 +858,6 @@
             }
             this.rendered[i] = 1;
 
-            if (this.show_active_sites) {
-              this.render_active_sites(split_start, split_end, i);
-            }
           }
         }
 
@@ -1068,6 +1082,11 @@
           draw_ticks(this.contexts[context_num], x, this.height - 30, 5);
         }
 
+        if (this.show_active_sites) {
+          this.render_active_sites(context_num,i,x);
+        }
+
+
         x += this.zoomed_column;
         column_num++;
 
@@ -1193,33 +1212,32 @@
 
         draw_border(this.contexts[context_num], 0, this.total_width);
 
+        if (this.show_active_sites) {
+          this.render_active_sites(context_num,i,x);
+        }
+
         x += this.zoomed_column;
         column_num++;
       }
 
     };
-    this.render_active_sites = function (start, end, context_num, borders) {
-      var x = 0,
-          column_num = start,
-          column_label = null,
-          i = 0,
-          top_height = Math.abs(this.data.max_height),
-          bottom_height = Math.abs(this.data.min_height_obs),
-          total_height = top_height + bottom_height,
-          top_percentage    = Math.round((Math.abs(this.data.max_height) * 100) / total_height),
-      //convert % to pixels
-          top_pix_height = Math.round((this.info_content_height * top_percentage) / 100),
-          bottom_pix_height = this.info_content_height - top_pix_height,
-          mod = 10;
-
-      for (i = start; i <= end; i++) {
-        if (this.active_sites_residues.indexOf(i)>-1)
-          draw_box(this.contexts[context_num], x+1, 20,  this.zoomed_column-2);
-        x += this.zoomed_column;
-        column_num++;
-      }
-
+    this.render_active_sites = function (context_num,i,x) {
+        var track =1;
+        for (var j=0;j<this.active_sites.length;j++){
+          var wtd = this.active_sites[j].controller.whatShouldBeDraw(i);
+          if (wtd == null)
+            continue;
+          if (wtd.type=="BLOCK"){
+            var color = this.aa_colors[wtd.base];
+            draw_box(this.contexts[context_num], x+1, margin_to_features+track*(padding_between_tracks+feature_height),  this.zoomed_column-2,color);
+          }else if (wtd.type=="LINE"){
+            draw_line(this.contexts[context_num], x, margin_to_features+padding_between_tracks*track+(track+0.5)*feature_height, x+this.zoomed_column, margin_to_features+padding_between_tracks*track+(track+0.5)*feature_height);
+          }
+          if (this.multiple_tracks)
+            track++;
+        }
     };
+
     this.toggle_colorscheme = function (scheme) {
       // work out the current column we are on so we can return there
       var col_total = this.current_column();
@@ -1531,7 +1549,8 @@
               '</br>' +
               '<label>Accession number: ' +
               '   <input type="text" name="familiy_accession" class="logo_ali_map" value="' + familiy_accession + '"/>' +
-              '</label><br/><button id="active_sites">Get Active Sites</button>' +
+              '</label><br/>' +
+              '<button id="active_sites">Get Active Sites</button>' +
               '</fieldset>';
 
           settings.append(active_sites);
@@ -1578,17 +1597,28 @@
           url = url.replace("[ACCESSION]", acc);
           $.getJSON(url,function(data){
             hmm_logo.active_sites = data;
-            hmm_logo.active_sites_residues = [];
-            for (var i in data){
-              hmm_logo.active_sites_residues = hmm_logo.active_sites_residues.concat(data[i].residues);
+            for (var i in data){ //for each protein
+              var x = new ActiveSitesAdder(data[i]);
+              data[i].columns=[];
+              data[i].bases=[];
+              data[i].controller=x;
+              for (var j=0;j< data[i].residues.length;j++) { // for each residue
+                var col = x.getColumnFromResidue(data[i].residues[j]);
+                if (col > 0 ) {
+                  data[i].columns.push({
+                    col:col,
+                    base:x.sequence[data[i].residues[j]-1],
+                    pos:j
+                  });
+                }
+              }
+              x.setColumns(data[i].columns);
             }
+            hmm_logo.show_active_sites = true;
+
+            hmm_logo.rendered = [];
+            hmm_logo.scrollme.reflow();
           });
-          hmm_logo.show_active_sites = true;
-          //Refreshing!!
-          hmm_logo.rendered = [];
-          $(this.called_on).find('.logo_yaxis').remove();
-          hmm_logo.render_y_axis_label();
-          hmm_logo.scrollme.reflow();
         }
       });
 

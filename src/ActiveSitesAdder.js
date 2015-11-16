@@ -5,12 +5,12 @@ var ActiveSitesAdder;
 var isNumeric = function( n ) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 };
-module.exports = ActiveSitesAdder = function(options) {
+ActiveSitesAdder = function(options) {
 
     options = options || {};
     this.cigar = options.cigar || "";
     this.sequence = options.sequence || "";
-    this.sequence_start = options.sequence_start || 1;
+    this.sequence_start = options.seq_start || 1;
     //this.model_start = options.model_start || 0;
     //this.alignment_start = options.alignment_start || 0;
     //this.sequence_end = options.sequence_end || 0;
@@ -18,7 +18,9 @@ module.exports = ActiveSitesAdder = function(options) {
     //this.alignment_end = options.alignment_end || 0;
     this.alignment="";
     this.number_shuffled_hits=options.number_shuffled_hits || 0;
+    this.columns = [];
 };
+
 ActiveSitesAdder.prototype.getColumnFromResidue = function(residue) {
     this.cigar = this.cigar.toUpperCase();
     var value= 1,
@@ -72,3 +74,23 @@ ActiveSitesAdder.prototype.getColumnFromResidue = function(residue) {
         return -1;
     return column+1 -this.number_shuffled_hits;
 };
+ActiveSitesAdder.prototype.whatShouldBeDraw = function(column){
+    if (this.columns.length<1)
+        return null;
+    for (var i=0; i<this.columns.length;i++) {
+        if (this.columns[i].col == column) {
+            this.columns[i].type = "BLOCK";
+            return this.columns[i];
+        }
+    }
+    if (this.columns[0].col<column && column<this.columns[this.columns.length-1].col) {
+        this.columns[0].type = "LINE";
+        return this.columns[0];
+    }
+    return null;
+}
+ActiveSitesAdder.prototype.setColumns = function(columns){
+    this.columns = columns.sort(function(a, b) { return a.col - b.col; });
+}
+if (typeof module != "undefined")
+    module.exports = ActiveSitesAdder

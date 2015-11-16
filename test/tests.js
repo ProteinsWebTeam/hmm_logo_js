@@ -6,7 +6,7 @@ var chai        = require('chai'),
 chai.should();
 
 describe('the alignment class', function() {
-    describe('trying with family PF02171', function () {
+    describe('trying with family PF09171', function () {
         var number_shuffled_hits=1;
         it('should calculate the sequence coordinate from a cigar for F4HKC1', function () {
             var x = new ActiveSitesAdder({
