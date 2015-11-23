@@ -464,7 +464,7 @@
     this.active_sites_sources = options.active_sites_sources || null;
     this.show_active_sites = false;
     this.active_sites = [];
-    this.multiple_tracks=false;
+    this.multiple_tracks=true;
 
     // turn off the insert rows if the hmm used the observed or weighted processing flags.
     if (this.data.processing && /^observed|weighted/.test(this.data.processing)) {
@@ -1227,11 +1227,11 @@
           var wtd = this.active_sites[j].controller.whatShouldBeDraw(i);
           if (wtd == null)
             continue;
+          var color = this.aa_colors[wtd.base];
           if (wtd.type=="BLOCK"){
-            var color = this.aa_colors[wtd.base];
             draw_box(this.contexts[context_num], x+1, margin_to_features+track*(padding_between_tracks+feature_height),  this.zoomed_column-2,color);
           }else if (wtd.type=="LINE"){
-            draw_line(this.contexts[context_num], x, margin_to_features+padding_between_tracks*track+(track+0.5)*feature_height, x+this.zoomed_column, margin_to_features+padding_between_tracks*track+(track+0.5)*feature_height);
+            draw_line(this.contexts[context_num], x, margin_to_features+padding_between_tracks*track+(track+0.5)*feature_height, x+this.zoomed_column, margin_to_features+padding_between_tracks*track+(track+0.5)*feature_height,color);
           }
           if (this.multiple_tracks)
             track++;
@@ -1608,11 +1608,13 @@
                   data[i].columns.push({
                     col:col,
                     base:x.sequence[data[i].residues[j]-1],
-                    pos:j
+                    pos:data[i].residues[j]-1
                   });
                 }
               }
               x.setColumns(data[i].columns);
+              console.log(data[i].columns);
+              console.log(x.alignment);
             }
             hmm_logo.show_active_sites = true;
 
