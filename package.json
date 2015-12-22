@@ -10,7 +10,9 @@
   "devDependencies": {
     "chai": "^3.4.1",
     "grunt": "~0.4.4",
-    "mocha": "^2.3.3"
+    "jsdom": "^7.2.1",
+    "mocha": "^2.3.3",
+    "mocha-jsdom": "^1.0.0"
   },
   "scripts": {
     "test": "mocha"
