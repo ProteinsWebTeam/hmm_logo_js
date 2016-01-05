@@ -7,6 +7,10 @@
  * Licensed under the MIT License.
  * https://github.com/Janelia-Farm-Xfam/hmm_logo_js/blob/master/LICENSE.txt
  */
+if (typeof module != "undefined")
+  var canvasSupport = require("./components/canvas_support.js"),
+      HMMLogo = require("./components/hmm_logo_canvas"),
+      ActiveSitesAdder = require("./ActiveSitesAdder.js");
 
 (function ($) {
   "use strict";
@@ -14,6 +18,7 @@
   $.fn.hmm_logo = function (options) {
     var logo = null,
       logo_graphic = $('<div class="logo_graphic">');
+    var self = this;
     if (canvasSupport()) {
       options = options || {};
 
@@ -146,22 +151,6 @@
           '</fieldset>';
         settings.append(ali_controls);
 
-        if (logo.active_sites_sources!=null && typeof logo.active_sites_sources == "object") {
-          var active_sites = '<fieldset><legend>ActiveSites</legend>' +
-              '<label>Source: <select name="member_db" class="logo_ali_map">';
-          for (var key in logo.active_sites_sources) {
-            active_sites += '<option value="'+key+'">'+key+'</option> ';
-          }
-          active_sites += '</select></label> ' + // + mod_help +
-              '</br>' +
-              '<label>Accession number: ' +
-              '   <input type="text" name="familiy_accession" class="logo_ali_map" value="PF00199"/>' +
-              '</label><br/>' +
-              '<button id="active_sites">Get Active Sites</button>' +
-              '</fieldset>';
-
-          settings.append(active_sites);
-        }
       }
 
       if (settings.children().length > 0) {
@@ -192,41 +181,6 @@
         e.preventDefault();
         var hmm_logo = logo;
         hmm_logo.change_zoom({'distance': 0.1, 'direction': '+'});
-      });
-
-      $(this).find('#active_sites').bind('click', function (e) {
-        e.preventDefault();
-        var hmm_logo = logo;
-        var source = $("select[name=member_db]").val(),
-            url = hmm_logo.active_sites_sources[source],
-            acc= $("input[name=familiy_accession]").val();
-        if (""!=acc.trim()) {
-          url = url.replace("[ACCESSION]", acc);
-          $.getJSON(url,function(data){
-            hmm_logo.active_sites = data;
-
-            for (var i in data){ //for each protein
-              data[i].residues=[]
-              for (var j=data[i].seq_start;j<data[i].sequence.length;j++)
-                data[i].residues.push({residue:j});
-              var x = new ActiveSitesAdder(data[i]);
-              data[i].columns=[];
-              data[i].controller=x;
-              for (var j=0;j< data[i].residues.length;j++) { // for each residue
-                var col = x.getColumnFromResidue(data[i].residues[j].residue);
-                if (col > 0 ) {
-                  data[i].residues[j].column = col;
-                  data[i].residues[j].base = x.sequence[data[i].residues[j].residue-1];
-                }
-              }
-              x.sortResidues();
-            }
-            hmm_logo.show_active_sites = true;
-
-            hmm_logo.rendered = [];
-            hmm_logo.scrollme.reflow();
-          });
-        }
       });
 
       $(this).find('.logo_zoomout').bind('click', function (e) {
@@ -374,6 +328,45 @@
             zoom = zoom - 0.1;
             logo.change_zoom({'distance': 0.1, 'direction': '-'});
           }
+        }
+      });
+
+      // ACTIVE SITES PANEL
+      if (logo.active_sites_sources!=null && typeof logo.active_sites_sources == "object") {
+        var active_sites = '<fieldset><legend>ActiveSites</legend>' +
+            '<label>Source: <select name="member_db" class="logo_ali_map">';
+        for (var key in logo.active_sites_sources) {
+          active_sites += '<option value="'+key+'">'+key+'</option> ';
+        }
+        active_sites += '</select></label> ' + // + mod_help +
+            '</br>' +
+            '<label>Accession number: ' +
+            '   <input type="text" name="familiy_accession" class="logo_ali_map" value="PF00199"/>' +
+            '</label><br/>' +
+            '<button id="active_sites">Get Active Sites</button>' +
+            '</fieldset>';
+
+        settings.append(active_sites);
+      }
+
+      $(this).find('#active_sites').bind('click', function (e) {
+        e.preventDefault();
+        var hmm_logo = logo;
+        var source = $("select[name=member_db]").val(),
+            url = hmm_logo.active_sites_sources[source],
+            acc= $("input[name=familiy_accession]").val();
+        if (""!=acc.trim()) {
+          url = url.replace("[ACCESSION]", acc);
+          $.getJSON(url,function(data){
+            hmm_logo.active_sites_adder = new ActiveSitesAdder(data,hmm_logo);
+            hmm_logo.active_sites_adder.process();
+            hmm_logo.show_active_sites = true;
+
+            hmm_logo.rendered = [];
+            hmm_logo.scrollme.reflow();
+            hmm_logo.scrollToColumn(hmm_logo.current_column()+1);
+            hmm_logo.scrollToColumn(hmm_logo.current_column()-1);
+          });
         }
       });
 

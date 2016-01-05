@@ -2,20 +2,23 @@
   "name": "hmm_logo",
   "version": "0.0.1",
   "description": "Component to generate logos from HHM alignments (skylign)",
-  "main": "src/main.js",
+  "main": "src/hmm_logo.js",
   "dependencies": {
-    "grunt": "~0.4.4",
     "jquery": "^2.1.4"
   },
   "devDependencies": {
+    "browserify": "^12.0.1",
     "chai": "^3.4.1",
     "grunt": "~0.4.4",
     "jsdom": "^7.2.1",
     "mocha": "^2.3.3",
-    "mocha-jsdom": "^1.0.0"
+    "mocha-jsdom": "^1.0.0",
+    "watchify": "^3.6.1"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build": "browserify src/hmm_logo.js -o bin/hmm_logo.bundle.js",
+    "watch": "watchify src/hmm_logo.js -v -o bin/hmm_logo.bundle.js"
   },
   "repository": "",
   "author": "",

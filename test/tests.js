@@ -1,6 +1,6 @@
 
 var chai        = require('chai'),
-    ActiveSitesAdder   = require("../src/ActiveSitesAdder.js"),
+    ActiveSites   = require("../src/ActiveSites.js"),
     canvasSupport   = require("../src/components/canvas_support.js"),
     ConsensusColors   = require("../src/components/consensus_colors.js"),
     Letter   = require("../src/components/letter.js"),
@@ -15,7 +15,7 @@ var window = jsdom.jsdom();
 
 describe('the alignment class using cigars', function() {
     it('should calculate the sequence coordinate from an alignment', function () {
-        var x = new ActiveSitesAdder({
+        var x = new ActiveSites({
             sequence:   "MDGKPAVSWEEDYEQRVNPELMTELLHNAIPVLKAVQWKVTSVTEGGCESVLPLTKASTNQHGTHQAALISLSADYTGGLALTTLLRGVPLAGIHRCNDEDSASLWLAAMDVKYRNPSTGHLTATCDIPANIARTVQQRYFNGKRVLVTLPVVFTSNGELVAEAEMRYFAQPSIQLKPTKSNPRISPIFKQKLKASARMIAGLRASSESKNIRVDQSHERQAAGPHGELLANRLNGVLPQLKDMVLARTRHIDETLRSVENIEQVVILGVGLDMRPFRMNEELGRPTFFELDLPEMLEERDRVISEMKPDANVNRHSMSADFKVDKISQLLLQNPEFDPKRPTAVVFEGCSMYFTREENQQILSDIASLLQHPDSLVWCDLVRENVVEGTVPSPDIKKFTDGMEELGERFIFGSNSPTDFFLTCDLPQTKSTTVGEFLGSDDPVLATYQFAVGSK",
             alignment:  "........................el---MTELLHNAIPVLKAVQWK....VTSV..T.E....G..GCESV.LP.L.T.K..aS.T.NQ.H...GTHqaalislsadYT.GGLALTT.LL.RG..VPL.AG.IH.RCNDEDS.....A........SL..W..L.A.A.M.DVKYRNPSTGH...LTATCDIP................-ANIART.VQQRYF.N.GK.RVLVTL..P..VV.FTS..N.G.EL.........VAEAEMRYFA--qp.........................................",
             seq_start: 20,

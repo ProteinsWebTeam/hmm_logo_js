@@ -11,15 +11,15 @@
     "residues": [
       {
         "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
-        "residue": 397
+        "residue": 80
       },
       {
         "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
-        "residue": 415
+        "residue": 100
       },
       {
         "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
-        "residue": 262
+        "residue": 120
       }
     ]
   }
