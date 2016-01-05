@@ -10,7 +10,7 @@
 if (typeof module != "undefined")
   var canvasSupport = require("./components/canvas_support.js"),
       HMMLogo = require("./components/hmm_logo_canvas"),
-      ActiveSitesAdder = require("./ActiveSitesAdder.js");
+      ActiveSitesAdder = require("./ActiveSites/ActiveSitesAdder.js");
 
 (function ($) {
   "use strict";

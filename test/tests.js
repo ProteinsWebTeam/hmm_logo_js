@@ -1,6 +1,6 @@
 
 var chai        = require('chai'),
-    ActiveSites   = require("../src/ActiveSites.js"),
+    ActiveSites   = require("../src/ActiveSites/ActiveSites.js"),
     canvasSupport   = require("../src/components/canvas_support.js"),
     ConsensusColors   = require("../src/components/consensus_colors.js"),
     Letter   = require("../src/components/letter.js"),

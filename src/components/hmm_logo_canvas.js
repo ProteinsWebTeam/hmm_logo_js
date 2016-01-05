@@ -421,7 +421,7 @@ function HMMLogo(options) {
                             padding_between_tracks: padding_between_tracks,
                             feature_height: feature_height
                         });
-                        this.active_sites_adder.paint(i, split_start, split_end);
+                        this.active_sites_adder.panel.paint(i, split_start, split_end);
                     }
                     this.rendered[i] = 1;
 

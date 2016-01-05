@@ -76,14 +76,19 @@ ActiveSites.prototype.sortResidues = function(columns){
 if (typeof module != "undefined")
     module.exports = ActiveSites
 },{}],2:[function(require,module,exports){
-var ActiveSites   = require("../src/ActiveSites.js");
+"use strict";
 
+var ActiveSites   = require("./ActiveSites.js"),
+    ActiveSitesPanel = require("./ActiveSitesPanel.js");
 
 var ActiveSitesAdder;
 
 ActiveSitesAdder = function(data, hmm_logo) {
+    var self = this;
     this.data = data;
     this.hmm_logo = hmm_logo;
+    this.panel = null;
+
 
     this.process = function(){
         for (var i in data){ //for each protein
@@ -101,17 +106,98 @@ ActiveSitesAdder = function(data, hmm_logo) {
     };
 
     this.setDrawingOptions = function(options){
-        this.margin_to_features = options.margin_to_features || 0;
-        this.padding_between_tracks = options.padding_between_tracks || 0;
-        this.feature_height = options.feature_height || 10;
+        options.hmm_logo = this.hmm_logo;
+        if (this.panel==null)
+            this.panel = new ActiveSitesPanel(options);
     };
 
+};
+
+if (typeof module != "undefined")
+    module.exports = ActiveSitesAdder;
+},{"./ActiveSites.js":1,"./ActiveSitesPanel.js":3}],3:[function(require,module,exports){
+"use strict";
+
+var CanvasButton = require("../components/canvas_button.js");
+
+var ActiveSitesPanel;
+
+ActiveSitesPanel = function(options) {
+    var self = this;
+    this.margin_to_features = options.margin_to_features || 0;
+    this.padding_between_tracks = options.padding_between_tracks || 0;
+    this.feature_height = options.feature_height || 10;
+    this.hmm_logo = options.hmm_logo || null;
+    this.canvas = null;
+    this.context =null;
+
+    var top = 1 + this.margin_to_features+this.padding_between_tracks+this.feature_height/ 2,
+        w = this.feature_height* 2,
+        h = this.feature_height*6;
+
+
+    this.up_button = new CanvasButton({x:2, y: top+2,w: w-4,h: w-4});
+    this.down_button = new CanvasButton({x:2, y: top+h-w+2,w: w-4,h: w-4});
+
+    //TODO: do this as a subclass
+    this.up_button.draw = function(context){
+        options = options || {};
+
+        switch (this.getState()){
+            case this.STATE_NORMAL:
+                draw_polygone(context,[
+                    [this.x+this.w/2, this.y],
+                    [this.x, this.y+this.h],
+                    [this.x+this.w, this.y+this.h]],"rgba(255,100,10, 0.3)"
+                );
+                break;
+            case this.STATE_MOUSE_OVER:
+                draw_polygone(context,[
+                    [this.x+this.w/2, this.y],
+                    [this.x, this.y+this.h],
+                    [this.x+this.w, this.y+this.h]],"rgba(255,100,10, 1)"
+                );
+                break;
+        }
+
+    };
+    this.getMouse = function (e) {
+        var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
+
+        // Compute the total offset
+        if (element.offsetParent !== undefined) {
+            do {
+                offsetX += element.offsetLeft;
+                offsetY += element.offsetTop;
+            } while ((element = element.offsetParent));
+        }
+
+        // Add padding and border style widths to offset
+        // Also add the offsets in case there's a position:fixed bar
+        offsetX += getAmountFromStyle(this.canvas, "paddingLeft") + getAmountFromStyle(this.canvas, "borderLeft") + getAmountFromStyle(this.canvas, "left");
+        offsetY += getAmountFromStyle(this.canvas, "paddingTop") + getAmountFromStyle(this.canvas, "borderTop") + getAmountFromStyle(this.canvas, "top");
+
+        mx = e.pageX - offsetX;
+        my = e.pageY - offsetY;
+
+        // We return a simple javascript object (a hash) with x and y defined
+        return {x: mx, y: my};
+
+    };
     this.paint = function (context_num, start, end) {
         var second_axis = document.getElementById("second_y_axis");
         if (second_axis==null)
             second_axis = this.hmm_logo.render_2nd_y_axis_label();
+        this.canvas = second_axis;
 
         this._paint_2nd_axis(second_axis.getContext('2d'));
+        second_axis.addEventListener('mousemove', function(e) {
+            var mouse = self.getMouse(e);
+            var previous=self.up_button.getState();
+            self.up_button.mousemove(mouse);
+            if (previous!=self.up_button.getState())
+                self._paint_2nd_axis();
+        });
 
         this._paint_background(this.hmm_logo.contexts[context_num]);
         for (var i = start,x=0; i <= end; i++) {
@@ -121,25 +207,20 @@ ActiveSitesAdder = function(data, hmm_logo) {
     };
 
     this._paint_2nd_axis = function(context){
-        var top = 1 + this.margin_to_features+this.padding_between_tracks+this.feature_height/ 2,
-            w = this.feature_height* 2,
-            h = this.feature_height*6;
+        context = context || self.context;
+        self.context = context;
         context.clearRect(0, top, w, h);
 
         draw_box(context, 0, top, w, h,
             "rgba(100,100,100, 0.2)","rgba(100,100,100, 0.0)"
         );
-
-        draw_polygone(context,[
-            [w/2,top+2],
-            [2,top+w],
-            [w-2,top+w]],"rgba(255,10,10, 0.3)"
-        );
-        draw_polygone(context,[
-            [w/2,top+h-2],
-            [2,top+h-w],
-            [w-2,top+h-w]],"rgba(255,10,10, 0.3)"
-        );
+        this.up_button.draw(context);
+        this.down_button.draw(context);
+        //draw_polygone(context,[
+        //    [w/2,top+h-2],
+        //    [2,top+h-w],
+        //    [w-2,top+h-w]],"rgba(255,10,10, 0.3)"
+        //);
     };
     this._paint_column = function(context_num,i,x) {
         var track =1;
@@ -201,11 +282,74 @@ ActiveSitesAdder = function(data, hmm_logo) {
         context.fill();
 
     }
+
+};
+
+function getAmountFromStyle(element,attribute){
+    var value = parseInt(element.style[attribute]);
+    return (isNaN(value))?0:value;
+}
+
+if (typeof module != "undefined")
+    module.exports = ActiveSitesPanel;
+
+},{"../components/canvas_button.js":4}],4:[function(require,module,exports){
+/**
+ * Created by gsalazar on 05/01/2016.
+ */
+"use strict";
+
+var CanvasButton;
+
+CanvasButton = function(options) {
+    options = options || {};
+    this.x = options.x || 0;
+    this.y = options.y || 0;
+    this.w = options.w || 10;
+    this.h = options.h || 10;
+
+    this.STATE_NORMAL = 0;
+    this.STATE_CLICKED = 1;
+    this.STATE_MOUSE_OVER = 2
+
+    var state = this.STATE_NORMAL;
+
+    this.getState = function(){
+        return state;
+    };
+    this.draw = function(context){
+        context.strokeStyle ="#000000";
+        context.strokeRect(this.x, this.y, this.w, this.h);
+    };
+
+    this.mousemove = function(mouse){
+        switch (state){
+            case this.STATE_NORMAL:
+                if (mouse.x>this.x && mouse.x<this.x+this.w && mouse.y>this.y && mouse.y<this.y+this.h)
+                    state = this.STATE_MOUSE_OVER;
+                break;
+            case this.STATE_MOUSE_OVER:
+                if (mouse.x<this.x || mouse.x>this.x+this.w || mouse.y<this.y || mouse.y>this.y+this.h)
+                    state = this.STATE_NORMAL;
+                break;
+        }
+    }
+    this.onClick = function() {
+        state = this.STATE_CLICKED;
+    };
+    this.onActionPerformed = function() {
+        state = this.STATE_NORMAL;
+    };
+    this.onMouseOver = function(){
+    }
+    this.onMouseOut = function(){
+        state = this.STATE_NORMAL;
+    }
 };
 
 if (typeof module != "undefined")
-    module.exports = ActiveSitesAdder;
-},{"../src/ActiveSites.js":1}],3:[function(require,module,exports){
+    module.exports = CanvasButton
+},{}],5:[function(require,module,exports){
 // checking for canvas support and caching result
 var canv_support = null;
 
@@ -219,7 +363,7 @@ function canvasSupport() {
 
 if (typeof module != "undefined")
     module.exports = canvasSupport;
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 function ConsensusColors() {
 
     this.grey = '#7a7a7a';
@@ -588,7 +732,7 @@ function ConsensusColors() {
 
 if (typeof module != "undefined")
     module.exports = ConsensusColors;
-},{}],5:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 if (typeof module != "undefined")
     var Letter = require("./letter.js"),
         canvasSupport   = require("./canvas_support.js"),
@@ -1012,7 +1156,7 @@ function HMMLogo(options) {
                             padding_between_tracks: padding_between_tracks,
                             feature_height: feature_height
                         });
-                        this.active_sites_adder.paint(i, split_start, split_end);
+                        this.active_sites_adder.panel.paint(i, split_start, split_end);
                     }
                     this.rendered[i] = 1;
 
@@ -1555,7 +1699,7 @@ function HMMLogo(options) {
 
 if (typeof module != "undefined")
     module.exports = HMMLogo;
-},{"./canvas_support.js":3,"./consensus_colors.js":4,"./letter.js":6}],6:[function(require,module,exports){
+},{"./canvas_support.js":5,"./consensus_colors.js":6,"./letter.js":8}],8:[function(require,module,exports){
 function Letter(letter, options) {
     options = options || {};
     this.value = letter;
@@ -1597,7 +1741,7 @@ function Letter(letter, options) {
 
 if (typeof module != "undefined")
     module.exports = Letter;
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*jslint browser:true */
 /*global G_vmlCanvasManager, EasyScroller */
 /** @license
@@ -1610,7 +1754,7 @@ if (typeof module != "undefined")
 if (typeof module != "undefined")
   var canvasSupport = require("./components/canvas_support.js"),
       HMMLogo = require("./components/hmm_logo_canvas"),
-      ActiveSitesAdder = require("./ActiveSitesAdder.js");
+      ActiveSitesAdder = require("./ActiveSites/ActiveSitesAdder.js");
 
 (function ($) {
   "use strict";
@@ -1978,4 +2122,4 @@ if (typeof module != "undefined")
   };
 })(jQuery);
 
-},{"./ActiveSitesAdder.js":2,"./components/canvas_support.js":3,"./components/hmm_logo_canvas":5}]},{},[7]);
+},{"./ActiveSites/ActiveSitesAdder.js":2,"./components/canvas_support.js":5,"./components/hmm_logo_canvas":7}]},{},[9]);
