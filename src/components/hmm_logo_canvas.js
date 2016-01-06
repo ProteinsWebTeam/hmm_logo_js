@@ -958,7 +958,12 @@ function HMMLogo(options) {
             new_left = this.coordinatesFromColumn(num);
         this.scrollme.scroller.scrollTo(new_left - half_view, 0, animate);
     };
-
+    this.refresh = function(){
+        this.rendered = [];
+        this.scrollme.reflow();
+        this.scrollToColumn(this.current_column()+1);
+        this.scrollToColumn(this.current_column()-1);
+    };
 
 }
 

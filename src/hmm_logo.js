@@ -361,11 +361,8 @@ if (typeof module != "undefined")
             hmm_logo.active_sites_adder = new ActiveSitesAdder(data,hmm_logo);
             hmm_logo.active_sites_adder.process();
             hmm_logo.show_active_sites = true;
+            hmm_logo.refresh();
 
-            hmm_logo.rendered = [];
-            hmm_logo.scrollme.reflow();
-            hmm_logo.scrollToColumn(hmm_logo.current_column()+1);
-            hmm_logo.scrollToColumn(hmm_logo.current_column()-1);
           });
         }
       });

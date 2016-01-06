@@ -11,6 +11,8 @@ CanvasButton = function(options) {
     this.y = options.y || 0;
     this.w = options.w || 10;
     this.h = options.h || 10;
+    this.color = options.color || "#000000";
+    this.hover_color = options.hover_color || "#882222";
 
     this.STATE_NORMAL = 0;
     this.STATE_CLICKED = 1;
@@ -22,8 +24,8 @@ CanvasButton = function(options) {
         return state;
     };
     this.draw = function(context){
-        context.strokeStyle ="#000000";
-        context.strokeRect(this.x, this.y, this.w, this.h);
+        context.fillStyle = ((state==this.STATE_NORMAL)?this.color:this.hover_color);
+        context.fillRect(this.x, this.y, this.w, this.h);
     };
 
     this.mousemove = function(mouse){
@@ -38,9 +40,12 @@ CanvasButton = function(options) {
                 break;
         }
     }
-    this.onClick = function() {
-        state = this.STATE_CLICKED;
-    };
+    this.click = function(mouse){
+        if (state==this.STATE_MOUSE_OVER){
+            this.onClick(mouse);
+        }
+    }
+    this.onClick = function(mouse) {};
     this.onActionPerformed = function() {
         state = this.STATE_NORMAL;
     };

@@ -122,6 +122,7 @@ var CanvasButton = require("../components/canvas_button.js");
 
 var ActiveSitesPanel;
 
+
 ActiveSitesPanel = function(options) {
     var self = this;
     this.margin_to_features = options.margin_to_features || 0;
@@ -130,36 +131,85 @@ ActiveSitesPanel = function(options) {
     this.hmm_logo = options.hmm_logo || null;
     this.canvas = null;
     this.context =null;
+    this.components =[];
 
     var top = 1 + this.margin_to_features+this.padding_between_tracks+this.feature_height/ 2,
         w = this.feature_height* 2,
         h = this.feature_height*6;
 
+    var up_button   = new CanvasButton({x:3, y: top+2,     w: w-6, h: w-6}),
+        down_button = new CanvasButton({x:3, y: top+h-w+2, w: w-6, h: w-6}),
+        mode_button = new CanvasButton({x:3, y: top+w+2,   w: w-6, h: w-6});
+    mode_button.mode="MULTIPLE";
 
-    this.up_button = new CanvasButton({x:2, y: top+2,w: w-4,h: w-4});
-    this.down_button = new CanvasButton({x:2, y: top+h-w+2,w: w-4,h: w-4});
+    this.components.push(up_button);
+    this.components.push(down_button);
+    this.components.push(mode_button);
 
-    //TODO: do this as a subclass
-    this.up_button.draw = function(context){
-        options = options || {};
-
-        switch (this.getState()){
-            case this.STATE_NORMAL:
-                draw_polygone(context,[
+    up_button.draw = function(context){
+        if (mode_button.mode=="MULTIPLE")
+            draw_polygone(context,[
+                [this.x+this.w/2, this.y],
+                [this.x, this.y+this.h],
+                [this.x+this.w, this.y+this.h]],
+                (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
+            );
+        else
+            draw_polygone(context,[
+                    [this.x+this.w/2, this.y+this.h],
+                    [this.x, this.y],
+                    [this.x+this.w, this.y]],
+                (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
+            );
+    };
+    up_button.onClick = function(mouse){
+        console.log("click UP", mouse);
+    };
+    down_button.draw = function(context){
+        var offset = (mode_button.mode=="MULTIPLE")?0:-2*w;
+        if (mode_button.mode!="MULTIPLE")
+            draw_polygone(context,[
                     [this.x+this.w/2, this.y],
                     [this.x, this.y+this.h],
-                    [this.x+this.w, this.y+this.h]],"rgba(255,100,10, 0.3)"
-                );
-                break;
-            case this.STATE_MOUSE_OVER:
-                draw_polygone(context,[
-                    [this.x+this.w/2, this.y],
-                    [this.x, this.y+this.h],
-                    [this.x+this.w, this.y+this.h]],"rgba(255,100,10, 1)"
-                );
-                break;
-        }
+                    [this.x+this.w, this.y+this.h]],
+                (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
+            );
+        else
+            draw_polygone(context,[
+                    [this.x+this.w/2, this.y+this.h],
+                    [this.x, this.y],
+                    [this.x+this.w, this.y]],
+                (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
+            );
+    };
+    down_button.onClick = function(mouse){
+        console.log("click DOWN", mouse);
+    };
+    mode_button.draw = function(context){
+        var r = this.w/2;
+        draw_circle(context, this.x+r, this.y+r, r+2,
+            (this.getState()==this.STATE_NORMAL)?"rgba(205,100,10, 0.8)":"rgba(255,100,10, 1)"
+        );
 
+        var offset = (mode_button.mode!="MULTIPLE")?0:r-1;
+
+        draw_polygone(context,[
+                [this.x+r, this.y+1 + offset],
+                [this.x+r/3, this.y+r-1 + offset],
+                [this.x+5*r/3, this.y+r-1 + offset]],
+            "#EEEEEE"
+        );
+        draw_polygone(context,[
+                [this.x+r, this.y+this.h-1 - offset],
+                [this.x+r/3, this.y+r+1 - offset],
+                [this.x+5*r/3, this.y+r+1 - offset]],
+            "#EEEEEE"
+        );
+    };
+    mode_button.onClick = function(mouse){
+        mode_button.mode=(mode_button.mode=="MULTIPLE")?"AGGREGATE":"MULTIPLE";
+//        self._paint_2nd_axis();
+        self.hmm_logo.refresh();
     };
     this.getMouse = function (e) {
         var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
@@ -184,20 +234,36 @@ ActiveSitesPanel = function(options) {
         return {x: mx, y: my};
 
     };
+    this.initialize_2nd_axis = function(second_axis){
+        second_axis = this.hmm_logo.render_2nd_y_axis_label();
+        second_axis.addEventListener('mousemove', function(e) {
+            var mouse = self.getMouse(e),
+                refresh = false;
+
+            for (var i=0;i<self.components.length;i++) {
+                var previous = self.components[i].getState();
+                self.components[i].mousemove(mouse);
+                if (previous != self.components[i].getState())
+                    refresh=true;
+            }
+            if(refresh)
+                self._paint_2nd_axis();
+        });
+        second_axis.addEventListener('click', function(e) {
+            var mouse = self.getMouse(e);
+            for (var i=0;i<self.components.length;i++)
+                self.components[i].click(mouse);
+        });
+        return second_axis;
+    };
     this.paint = function (context_num, start, end) {
         var second_axis = document.getElementById("second_y_axis");
         if (second_axis==null)
-            second_axis = this.hmm_logo.render_2nd_y_axis_label();
+            second_axis = this.initialize_2nd_axis()
+
         this.canvas = second_axis;
 
         this._paint_2nd_axis(second_axis.getContext('2d'));
-        second_axis.addEventListener('mousemove', function(e) {
-            var mouse = self.getMouse(e);
-            var previous=self.up_button.getState();
-            self.up_button.mousemove(mouse);
-            if (previous!=self.up_button.getState())
-                self._paint_2nd_axis();
-        });
 
         this._paint_background(this.hmm_logo.contexts[context_num]);
         for (var i = start,x=0; i <= end; i++) {
@@ -210,17 +276,13 @@ ActiveSitesPanel = function(options) {
         context = context || self.context;
         self.context = context;
         context.clearRect(0, top, w, h);
+        var offset = (mode_button.mode=="MULTIPLE")?0:w;
 
-        draw_box(context, 0, top, w, h,
+        draw_box(context, 0, top+offset, w, h-2*offset,
             "rgba(100,100,100, 0.2)","rgba(100,100,100, 0.0)"
         );
-        this.up_button.draw(context);
-        this.down_button.draw(context);
-        //draw_polygone(context,[
-        //    [w/2,top+h-2],
-        //    [2,top+h-w],
-        //    [w-2,top+h-w]],"rgba(255,10,10, 0.3)"
-        //);
+        for (var i=0;i<self.components.length;i++)
+            self.components[i].draw(context);
     };
     this._paint_column = function(context_num,i,x) {
         var track =1;
@@ -248,12 +310,10 @@ ActiveSitesPanel = function(options) {
         }
     };
     this._paint_background = function(context){
-        draw_box(context,
-            0,
-            this.margin_to_features+this.padding_between_tracks+this.feature_height/2,
-            context.canvas.width,
-            this.feature_height*6,
-            "rgba(100,100,100, 0.2)","rgba(100,100,100, 0.0)");
+        var offset = (mode_button.mode=="MULTIPLE")?0:w;
+        draw_box(context, 0, top+offset, context.canvas.width, h-2*offset,
+            "rgba(100,100,100, 0.2)","rgba(100,100,100, 0.0)"
+        );
     }
     function draw_box(context, x, y, width, height, color,border) {
         color = color || "rgba(100,100,100, 0.2)";
@@ -282,7 +342,13 @@ ActiveSitesPanel = function(options) {
         context.fill();
 
     }
-
+    function draw_circle(context,x,y,radius,color) {
+        context.fillStyle = color;
+        context.strokeStyle = color;
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI*2, true);
+        context.fill();
+    }
 };
 
 function getAmountFromStyle(element,attribute){
@@ -307,6 +373,8 @@ CanvasButton = function(options) {
     this.y = options.y || 0;
     this.w = options.w || 10;
     this.h = options.h || 10;
+    this.color = options.color || "#000000";
+    this.hover_color = options.hover_color || "#882222";
 
     this.STATE_NORMAL = 0;
     this.STATE_CLICKED = 1;
@@ -318,8 +386,8 @@ CanvasButton = function(options) {
         return state;
     };
     this.draw = function(context){
-        context.strokeStyle ="#000000";
-        context.strokeRect(this.x, this.y, this.w, this.h);
+        context.fillStyle = ((state==this.STATE_NORMAL)?this.color:this.hover_color);
+        context.fillRect(this.x, this.y, this.w, this.h);
     };
 
     this.mousemove = function(mouse){
@@ -334,9 +402,12 @@ CanvasButton = function(options) {
                 break;
         }
     }
-    this.onClick = function() {
-        state = this.STATE_CLICKED;
-    };
+    this.click = function(mouse){
+        if (state==this.STATE_MOUSE_OVER){
+            this.onClick(mouse);
+        }
+    }
+    this.onClick = function(mouse) {};
     this.onActionPerformed = function() {
         state = this.STATE_NORMAL;
     };
@@ -1693,7 +1764,12 @@ function HMMLogo(options) {
             new_left = this.coordinatesFromColumn(num);
         this.scrollme.scroller.scrollTo(new_left - half_view, 0, animate);
     };
-
+    this.refresh = function(){
+        this.rendered = [];
+        this.scrollme.reflow();
+        this.scrollToColumn(this.current_column()+1);
+        this.scrollToColumn(this.current_column()-1);
+    };
 
 }
 
@@ -2105,11 +2181,8 @@ if (typeof module != "undefined")
             hmm_logo.active_sites_adder = new ActiveSitesAdder(data,hmm_logo);
             hmm_logo.active_sites_adder.process();
             hmm_logo.show_active_sites = true;
+            hmm_logo.refresh();
 
-            hmm_logo.rendered = [];
-            hmm_logo.scrollme.reflow();
-            hmm_logo.scrollToColumn(hmm_logo.current_column()+1);
-            hmm_logo.scrollToColumn(hmm_logo.current_column()-1);
           });
         }
       });
