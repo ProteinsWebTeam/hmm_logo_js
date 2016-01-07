@@ -10,6 +10,8 @@ ActiveSitesPanel = function(options) {
     this.margin_to_features = options.margin_to_features || 0;
     this.padding_between_tracks = options.padding_between_tracks || 0;
     this.feature_height = options.feature_height || 10;
+    this.multiple_tracks=true;
+
     this.hmm_logo = options.hmm_logo || null;
     this.data = options.data || null;
 
@@ -17,11 +19,13 @@ ActiveSitesPanel = function(options) {
     this.context =null;
     this.components =[];
 
-    this.offsetY=0;
-
     var top = 1 + this.margin_to_features+this.padding_between_tracks+this.feature_height/ 2,
         w = this.feature_height* 2,
         h = this.feature_height*6;
+
+    this.offsetY=0;
+    this.top_limit=0;
+    this.bottom_limit=h-2*this.feature_height;
 
     var up_button   = new CanvasButton({x:3, y: top+2,     w: w-6, h: w-6}),
         down_button = new CanvasButton({x:3, y: top+h-w+2, w: w-6, h: w-6});
@@ -47,11 +51,12 @@ ActiveSitesPanel = function(options) {
     };
 
     up_button.onClick = function(mouse){
-        self.offsetY = (self.offsetY<=1)?0:self.offsetY-2;
+        self.offsetY = (self.offsetY<self.bottom_limit)?self.bottom_limit:self.offsetY-2;
         self.hmm_logo.refresh();
     };
     down_button.onClick = function(mouse){
-        self.offsetY = (self.offsetY>=h-this.feature_height)?h-this.feature_height:self.offsetY+2;
+//        self.offsetY = (self.offsetY>=self.bottom_limit)?self.bottom_limit:self.offsetY+2;
+        self.offsetY = (self.offsetY>self.top_limit)?self.top_limit:self.offsetY+2;
         self.hmm_logo.refresh();
     };
     this.getMouse = function (e) {
@@ -97,6 +102,7 @@ ActiveSitesPanel = function(options) {
             for (var i=0;i<self.components.length;i++)
                 self.components[i].click(mouse);
         });
+        this.bottom_limit = h - Object.keys(self.data).length * (this.feature_height +this.padding_between_tracks)
         return second_axis;
     };
     this.paint = function (context_num, start, end) {
@@ -128,28 +134,32 @@ ActiveSitesPanel = function(options) {
             self.components[i].draw(context);
     };
     this._paint_column = function(context_num,i,x) {
-        var track =1;
+        var track =0;
         for (var j in this.data){
+            if (this.multiple_tracks)
+                track++;
             var wtd = this.data[j].controller.whatShouldBeDraw(i);
             if (wtd == null)
                 continue;
-            var color = this.hmm_logo.aa_colors[wtd.base];
-            if (wtd.type == "BLOCK") {
-                draw_box(   this.hmm_logo.contexts[context_num],
-                    x + 1,
-                    self.offsetY + this.margin_to_features + track * (this.padding_between_tracks + this.feature_height),
-                    this.hmm_logo.zoomed_column -2,
-                    this.feature_height, color,"#AAA0AF");
-            } else if (wtd.type == "LINE") {
-                draw_line(this.hmm_logo.contexts[context_num],
-                    x,
-                    self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height,
-                    x + this.hmm_logo.zoomed_column,
-                    self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height,
-                    "#AAA0AF");
+            var color = this.hmm_logo.aa_colors[wtd.base],
+                y1 = self.offsetY + this.margin_to_features + track * (this.padding_between_tracks + this.feature_height);
+
+            if (top<y1 && y1<top+h-this.feature_height) {
+                if (wtd.type == "BLOCK") {
+                    draw_box(this.hmm_logo.contexts[context_num],
+                        x + 1,
+                        self.offsetY + this.margin_to_features + track * (this.padding_between_tracks + this.feature_height),
+                        this.hmm_logo.zoomed_column - 2,
+                        this.feature_height, color, "#AAA0AF");
+                } else if (wtd.type == "LINE") {
+                    draw_line(this.hmm_logo.contexts[context_num],
+                        x,
+                        self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height,
+                        x + this.hmm_logo.zoomed_column,
+                        self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height,
+                        "#AAA0AF");
+                }
             }
-            if (this.multiple_tracks)
-                track++;
         }
     };
     this._paint_background = function(context){

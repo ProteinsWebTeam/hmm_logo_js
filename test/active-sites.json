@@ -11,6 +11,54 @@
     "residues": [
       {
         "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 78
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 90
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 100
+      }
+    ]
+  },
+  "Q54ME2": {
+    "seq_start": 30,
+    "seq_end": 157,
+    "model_start": 2,
+    "model_end": 126,
+    "ali_start": 31,
+    "ali_end": 157,
+    "sequence": "MKLILVLLCLISTLFVVKGGLSPTEQQIIVSYHNKWRSSPIGPTPSTTIPALKWNATIAAALQSSLDKCDGKFSTMSQYGTNSEWQSWWTPNTYFNLNATLDNIQKGASFYDWNAKGCNSSANYNCQLWTYAVWSKSTSYGCAKTICPDKSEVSCSYYPAGGFKGVLPYTPKTTTPAPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPAPTSTLTVDWTSYQTPIRDQGQCGSCWAFASSAALESRYLIKYGTAQKSTLQLSNQNAVNCIASGCNGGWSGNYFNFFKTPGIAYEKDDPYKAVTGTSCITTSSVARFKYTNYGYTEKTKAALLAELKKGPVTIAVYVDSAFQNYKSGIYNSATKYTGINHLVLLVGYDQATDAYKIKNSWGSWWGESGYMRITASNDNLAIFAYNSYYPTF",
+    "alignment": "mklilvllclistlfvvkgglspteqqiiv-SYHNKWRsspigptPSTTIPALKWNATIAAALQSSLDKCDG--KFSTMSQYGTNSEWQSWWTP-----NTYFNLNATLDNIQKGASFYDWNAKGCNSsanynCQLWTYAVWSKSTSYGCAKTICPDKSE---VSCSYypaggfkgvlpytpktttpapttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpaptstltvdwtsyqtpirdqgqcgscwafassaalesrylikygtaqkstlqlsnqnavnciasgcnggwsgnyfnffktpgiayekddpykavtgtscittssvarfkytnygytektkaallaelkkgpvtiavyvdsafqnyksgiynsatkytginhlvllvgydqatdaykiknswgswwgesgymritasndnlaifaynsyyptf",
+    "residues": [
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 70
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 77
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 83
+      }
+    ]
+  },
+  "Q54ME3": {
+    "seq_start": 30,
+    "seq_end": 157,
+    "model_start": 2,
+    "model_end": 126,
+    "ali_start": 31,
+    "ali_end": 157,
+    "sequence": "MKLILVLLCLISTLFVVKGGLSPTEQQIIVSYHNKWRSSPIGPTPSTTIPALKWNATIAAALQSSLDKCDGKFSTMSQYGTNSEWQSWWTPNTYFNLNATLDNIQKGASFYDWNAKGCNSSANYNCQLWTYAVWSKSTSYGCAKTICPDKSEVSCSYYPAGGFKGVLPYTPKTTTPAPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPAPTSTLTVDWTSYQTPIRDQGQCGSCWAFASSAALESRYLIKYGTAQKSTLQLSNQNAVNCIASGCNGGWSGNYFNFFKTPGIAYEKDDPYKAVTGTSCITTSSVARFKYTNYGYTEKTKAALLAELKKGPVTIAVYVDSAFQNYKSGIYNSATKYTGINHLVLLVGYDQATDAYKIKNSWGSWWGESGYMRITASNDNLAIFAYNSYYPTF",
+    "alignment": "mklilvllclistlfvvkgglspteqqiiv-SYHNKWRsspigptPSTTIPALKWNATIAAALQSSLDKCDG--KFSTMSQYGTNSEWQSWWTP-----NTYFNLNATLDNIQKGASFYDWNAKGCNSsanynCQLWTYAVWSKSTSYGCAKTICPDKSE---VSCSYypaggfkgvlpytpktttpapttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpaptstltvdwtsyqtpirdqgqcgscwafassaalesrylikygtaqkstlqlsnqnavnciasgcnggwsgnyfnffktpgiayekddpykavtgtscittssvarfkytnygytektkaallaelkkgpvtiavyvdsafqnyksgiynsatkytginhlvllvgydqatdaykiknswgswwgesgymritasndnlaifaynsyyptf",
+    "residues": [
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
         "residue": 80
       },
       {
@@ -20,6 +68,78 @@
       {
         "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
         "residue": 120
+      }
+    ]
+  },
+  "Q54ME4": {
+    "seq_start": 30,
+    "seq_end": 157,
+    "model_start": 2,
+    "model_end": 126,
+    "ali_start": 31,
+    "ali_end": 157,
+    "sequence": "MKLILVLLCLISTLFVVKGGLSPTEQQIIVSYHNKWRSSPIGPTPSTTIPALKWNATIAAALQSSLDKCDGKFSTMSQYGTNSEWQSWWTPNTYFNLNATLDNIQKGASFYDWNAKGCNSSANYNCQLWTYAVWSKSTSYGCAKTICPDKSEVSCSYYPAGGFKGVLPYTPKTTTPAPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPAPTSTLTVDWTSYQTPIRDQGQCGSCWAFASSAALESRYLIKYGTAQKSTLQLSNQNAVNCIASGCNGGWSGNYFNFFKTPGIAYEKDDPYKAVTGTSCITTSSVARFKYTNYGYTEKTKAALLAELKKGPVTIAVYVDSAFQNYKSGIYNSATKYTGINHLVLLVGYDQATDAYKIKNSWGSWWGESGYMRITASNDNLAIFAYNSYYPTF",
+    "alignment": "mklilvllclistlfvvkgglspteqqiiv-SYHNKWRsspigptPSTTIPALKWNATIAAALQSSLDKCDG--KFSTMSQYGTNSEWQSWWTP-----NTYFNLNATLDNIQKGASFYDWNAKGCNSsanynCQLWTYAVWSKSTSYGCAKTICPDKSE---VSCSYypaggfkgvlpytpktttpapttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpaptstltvdwtsyqtpirdqgqcgscwafassaalesrylikygtaqkstlqlsnqnavnciasgcnggwsgnyfnffktpgiayekddpykavtgtscittssvarfkytnygytektkaallaelkkgpvtiavyvdsafqnyksgiynsatkytginhlvllvgydqatdaykiknswgswwgesgymritasndnlaifaynsyyptf",
+    "residues": [
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 81
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 101
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 121
+      }
+    ]
+  },
+  "Q54ME5": {
+    "seq_start": 30,
+    "seq_end": 157,
+    "model_start": 2,
+    "model_end": 126,
+    "ali_start": 31,
+    "ali_end": 157,
+    "sequence": "MKLILVLLCLISTLFVVKGGLSPTEQQIIVSYHNKWRSSPIGPTPSTTIPALKWNATIAAALQSSLDKCDGKFSTMSQYGTNSEWQSWWTPNTYFNLNATLDNIQKGASFYDWNAKGCNSSANYNCQLWTYAVWSKSTSYGCAKTICPDKSEVSCSYYPAGGFKGVLPYTPKTTTPAPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPAPTSTLTVDWTSYQTPIRDQGQCGSCWAFASSAALESRYLIKYGTAQKSTLQLSNQNAVNCIASGCNGGWSGNYFNFFKTPGIAYEKDDPYKAVTGTSCITTSSVARFKYTNYGYTEKTKAALLAELKKGPVTIAVYVDSAFQNYKSGIYNSATKYTGINHLVLLVGYDQATDAYKIKNSWGSWWGESGYMRITASNDNLAIFAYNSYYPTF",
+    "alignment": "mklilvllclistlfvvkgglspteqqiiv-SYHNKWRsspigptPSTTIPALKWNATIAAALQSSLDKCDG--KFSTMSQYGTNSEWQSWWTP-----NTYFNLNATLDNIQKGASFYDWNAKGCNSsanynCQLWTYAVWSKSTSYGCAKTICPDKSE---VSCSYypaggfkgvlpytpktttpapttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpaptstltvdwtsyqtpirdqgqcgscwafassaalesrylikygtaqkstlqlsnqnavnciasgcnggwsgnyfnffktpgiayekddpykavtgtscittssvarfkytnygytektkaallaelkkgpvtiavyvdsafqnyksgiynsatkytginhlvllvgydqatdaykiknswgswwgesgymritasndnlaifaynsyyptf",
+    "residues": [
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 82
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 102
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 122
+      }
+    ]
+  },
+  "Q54ME6": {
+    "seq_start": 30,
+    "seq_end": 157,
+    "model_start": 2,
+    "model_end": 126,
+    "ali_start": 31,
+    "ali_end": 157,
+    "sequence": "MKLILVLLCLISTLFVVKGGLSPTEQQIIVSYHNKWRSSPIGPTPSTTIPALKWNATIAAALQSSLDKCDGKFSTMSQYGTNSEWQSWWTPNTYFNLNATLDNIQKGASFYDWNAKGCNSSANYNCQLWTYAVWSKSTSYGCAKTICPDKSEVSCSYYPAGGFKGVLPYTPKTTTPAPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPKPTTPAPTTPAPTSTLTVDWTSYQTPIRDQGQCGSCWAFASSAALESRYLIKYGTAQKSTLQLSNQNAVNCIASGCNGGWSGNYFNFFKTPGIAYEKDDPYKAVTGTSCITTSSVARFKYTNYGYTEKTKAALLAELKKGPVTIAVYVDSAFQNYKSGIYNSATKYTGINHLVLLVGYDQATDAYKIKNSWGSWWGESGYMRITASNDNLAIFAYNSYYPTF",
+    "alignment": "mklilvllclistlfvvkgglspteqqiiv-SYHNKWRsspigptPSTTIPALKWNATIAAALQSSLDKCDG--KFSTMSQYGTNSEWQSWWTP-----NTYFNLNATLDNIQKGASFYDWNAKGCNSsanynCQLWTYAVWSKSTSYGCAKTICPDKSE---VSCSYypaggfkgvlpytpktttpapttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpkpttpapttpaptstltvdwtsyqtpirdqgqcgscwafassaalesrylikygtaqkstlqlsnqnavnciasgcnggwsgnyfnffktpgiayekddpykavtgtscittssvarfkytnygytektkaallaelkkgpvtiavyvdsafqnyksgiynsatkytginhlvllvgydqatdaykiknswgswwgesgymritasndnlaifaynsyyptf",
+    "residues": [
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 85
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 105
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 125
       }
     ]
   }

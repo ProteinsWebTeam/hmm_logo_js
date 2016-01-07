@@ -39,7 +39,6 @@ function HMMLogo(options) {
 
     this.active_sites_sources = options.active_sites_sources || null;
     this.show_active_sites = false;
-    this.multiple_tracks=false;
     this.active_sites_adder = null;
 
     // turn off the insert rows if the hmm used the observed or weighted processing flags.
