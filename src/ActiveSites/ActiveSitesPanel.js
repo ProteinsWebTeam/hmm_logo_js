@@ -16,84 +16,42 @@ ActiveSitesPanel = function(options) {
     this.canvas = null;
     this.context =null;
     this.components =[];
-    this.MODE_MULTIPLE = "MULTIPLE";
-    this.MODE_AGGREGATE = "AGGREGATE";
+
+    this.offsetY=0;
 
     var top = 1 + this.margin_to_features+this.padding_between_tracks+this.feature_height/ 2,
         w = this.feature_height* 2,
         h = this.feature_height*6;
 
     var up_button   = new CanvasButton({x:3, y: top+2,     w: w-6, h: w-6}),
-        down_button = new CanvasButton({x:3, y: top+h-w+2, w: w-6, h: w-6}),
-        mode_button = new CanvasButton({x:3, y: top+w+2,   w: w-6, h: w-6});
-    mode_button.mode=this.MODE_MULTIPLE;
+        down_button = new CanvasButton({x:3, y: top+h-w+2, w: w-6, h: w-6});
 
     this.components.push(up_button);
     this.components.push(down_button);
-    this.components.push(mode_button);
 
     up_button.draw = function(context){
-        if (mode_button.mode == self.MODE_MULTIPLE)
-            draw_polygone(context,[
-                [this.x+this.w/2, this.y],
-                [this.x, this.y+this.h],
-                [this.x+this.w, this.y+this.h]],
-                (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
-            );
-        else // AGGREGATE
-            draw_polygone(context,[
-                    [this.x+this.w/2, this.y+this.h],
-                    [this.x, this.y],
-                    [this.x+this.w, this.y]],
-                (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
-            );
-    };
-    up_button.onClick = function(mouse){
-        console.log("click UP", mouse);
+        draw_polygone(context,[
+            [this.x+this.w/2, this.y],
+            [this.x, this.y+this.h],
+            [this.x+this.w, this.y+this.h]],
+            (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
+        );
     };
     down_button.draw = function(context){
-        if (mode_button.mode == self.MODE_MULTIPLE)
-            draw_polygone(context,[
-                    [this.x+this.w/2, this.y+this.h],
-                    [this.x, this.y],
-                    [this.x+this.w, this.y]],
-                (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
-            );
-        else // AGGREGATE
-            draw_polygone(context,[
-                    [this.x+this.w/2, this.y],
-                    [this.x, this.y+this.h],
-                    [this.x+this.w, this.y+this.h]],
-                (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
-            );
+        draw_polygone(context,[
+                [this.x+this.w/2, this.y+this.h],
+                [this.x, this.y],
+                [this.x+this.w, this.y]],
+            (this.getState()==this.STATE_NORMAL)?"rgba(255,100,10, 0.3)":"rgba(255,100,10, 1)"
+        );
+    };
+
+    up_button.onClick = function(mouse){
+        self.offsetY = (self.offsetY<=1)?0:self.offsetY-2;
+        self.hmm_logo.refresh();
     };
     down_button.onClick = function(mouse){
-        console.log("click DOWN", mouse);
-    };
-    mode_button.draw = function(context){
-        var r = this.w/2;
-        draw_circle(context, this.x+r, this.y+r, r+2,
-            (this.getState()==this.STATE_NORMAL)?"rgba(205,100,10, 0.8)":"rgba(255,100,10, 1)"
-        );
-
-        var offset = (mode_button.mode==self.MODE_AGGREGATE)?0:r-1;
-
-        draw_polygone(context,[
-                [this.x+r, this.y+1 + offset],
-                [this.x+r/3, this.y+r-1 + offset],
-                [this.x+5*r/3, this.y+r-1 + offset]],
-            "#EEEEEE"
-        );
-        draw_polygone(context,[
-                [this.x+r, this.y+this.h-1 - offset],
-                [this.x+r/3, this.y+r+1 - offset],
-                [this.x+5*r/3, this.y+r+1 - offset]],
-            "#EEEEEE"
-        );
-    };
-    mode_button.onClick = function(){
-        mode_button.mode=(mode_button.mode==self.MODE_MULTIPLE)?self.MODE_AGGREGATE:self.MODE_MULTIPLE;
-//        self._paint_2nd_axis();
+        self.offsetY = (self.offsetY>=h-this.feature_height)?h-this.feature_height:self.offsetY+2;
         self.hmm_logo.refresh();
     };
     this.getMouse = function (e) {
@@ -161,9 +119,9 @@ ActiveSitesPanel = function(options) {
         context = context || self.context;
         self.context = context;
         context.clearRect(0, top, w, h);
-        var offset = (mode_button.mode==self.MODE_MULTIPLE)?0:w;
+       // var offset = (mode_button.mode==self.MODE_MULTIPLE)?0:w;
 
-        draw_box(context, 0, top+offset, w, h-2*offset,
+        draw_box(context, 0, top, w, h,
             "rgba(100,100,100, 0.2)","rgba(100,100,100, 0.0)"
         );
         for (var i=0;i<self.components.length;i++)
@@ -179,15 +137,15 @@ ActiveSitesPanel = function(options) {
             if (wtd.type == "BLOCK") {
                 draw_box(   this.hmm_logo.contexts[context_num],
                     x + 1,
-                    this.margin_to_features + track * (this.padding_between_tracks + this.feature_height),
+                    self.offsetY + this.margin_to_features + track * (this.padding_between_tracks + this.feature_height),
                     this.hmm_logo.zoomed_column -2,
                     this.feature_height, color,"#AAA0AF");
             } else if (wtd.type == "LINE") {
                 draw_line(this.hmm_logo.contexts[context_num],
                     x,
-                    this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height,
+                    self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height,
                     x + this.hmm_logo.zoomed_column,
-                    this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height,
+                    self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height,
                     "#AAA0AF");
             }
             if (this.multiple_tracks)
@@ -195,8 +153,7 @@ ActiveSitesPanel = function(options) {
         }
     };
     this._paint_background = function(context){
-        var offset = (mode_button.mode==self.MODE_MULTIPLE)?0:w;
-        draw_box(context, 0, top+offset, context.canvas.width, h-2*offset,
+        draw_box(context, 0, top, context.canvas.width, h,
             "rgba(100,100,100, 0.2)","rgba(100,100,100, 0.0)"
         );
     };
