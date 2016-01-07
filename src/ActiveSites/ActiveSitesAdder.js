@@ -29,6 +29,7 @@ ActiveSitesAdder = function(data, hmm_logo) {
 
     this.setDrawingOptions = function(options){
         options.hmm_logo = this.hmm_logo;
+        options.data = this.data;
         if (this.panel==null)
             this.panel = new ActiveSitesPanel(options);
     };
