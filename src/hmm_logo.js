@@ -358,7 +358,11 @@ if (typeof module != "undefined")
         if (""!=acc.trim()) {
           url = url.replace("[ACCESSION]", acc);
           $.getJSON(url,function(data){
-            hmm_logo.active_sites_adder = new ActiveSitesAdder(data,hmm_logo);
+            if (hmm_logo.active_sites_adder==null)
+              hmm_logo.active_sites_adder = new ActiveSitesAdder(data,hmm_logo);
+            else{
+              hmm_logo.active_sites_adder.resetData(data);
+            }
             hmm_logo.active_sites_adder.process();
             hmm_logo.show_active_sites = true;
             hmm_logo.refresh();

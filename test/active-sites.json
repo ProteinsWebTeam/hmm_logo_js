@@ -20,6 +20,10 @@
       {
         "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
         "residue": 100
+      },
+      {
+        "annotation": "{ECO:0000255|PROSITE-ProRule:PRU10088}",
+        "residue": 102
       }
     ]
   },

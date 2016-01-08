@@ -462,19 +462,22 @@ function HMMLogo(options) {
 
     this.render_y_axis_label = function () {
         //attach a canvas for the y-axis
-        $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="300" width="55"></canvas>');
+        $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="302" width="55"></canvas>');
+        this.paint_y_axis_label();
+    };
+
+    this.paint_y_axis_label = function () {
         var canvas = $(this.called_on).find('.logo_yaxis'),
-            top_pix_height = 0,
-            bottom_pix_height = 0,
-            top_height = Math.abs(this.data.max_height),
-            bottom_height = (isNaN(this.data.min_height_obs)) ? 0 : parseInt(this.data.min_height_obs, 10),
-            context = null,
-            axis_label = "Information Content (bits)";
+            context;
         if (!canvasSupport()) {
             canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
         }
-
         context = canvas[0].getContext('2d');
+
+        var axis_label = "Information Content (bits)";
+        context.clearRect(0, 0, 55, 300);
+
+
         //draw min/max tick marks
         context.beginPath();
         context.moveTo(55, 1);
@@ -505,6 +508,10 @@ function HMMLogo(options) {
         // draw the min label
         context.fillText('0', 38, this.info_content_height);
 
+        if (this.show_active_sites && this.active_sites_adder!=null) {
+            this.active_sites_adder.panel.paintLabels(context);
+        }
+
         // draw the axis label
         if (this.data.height_calc === 'score') {
             axis_label = "Score (bits)";
@@ -524,6 +531,7 @@ function HMMLogo(options) {
             context.fillText('ins. prob.', 50, 280);
             context.fillText('ins. len.', 46, 296);
         }
+
     };
 
     this.render_2nd_y_axis_label = function () {

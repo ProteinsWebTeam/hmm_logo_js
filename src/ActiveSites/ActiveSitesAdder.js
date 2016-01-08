@@ -6,21 +6,24 @@ var ActiveSites   = require("./ActiveSites.js"),
 var ActiveSitesAdder;
 
 ActiveSitesAdder = function(data, hmm_logo) {
-    var self = this;
     this.data = data;
     this.hmm_logo = hmm_logo;
     this.panel = null;
 
+    this.resetData = function(data) {
+        this.data = data;
+        this.panel = null;
+    };
 
     this.process = function(){
-        for (var i in data){ //for each protein
-            var x = new ActiveSites(data[i]);
-            data[i].controller=x;
-            for (var j=0;j< data[i].residues.length;j++) { // for each residue
-                var col = x.getColumnFromResidue(data[i].residues[j].residue);
+        for (var i in this.data){ //for each protein
+            var x = new ActiveSites(this.data[i]);
+            this.data[i].controller=x;
+            for (var j=0;j< this.data[i].residues.length;j++) { // for each residue
+                var col = x.getColumnFromResidue(this.data[i].residues[j].residue);
                 if (col > 0 ) {
-                    data[i].residues[j].column = col;
-                    data[i].residues[j].base = x.sequence[data[i].residues[j].residue-1];
+                    this.data[i].residues[j].column = col;
+                    this.data[i].residues[j].base = x.sequence[this.data[i].residues[j].residue-1];
                 }
             }
             x.sortResidues();

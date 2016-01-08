@@ -27,6 +27,8 @@ ActiveSitesPanel = function(options) {
     this.top_limit=0;
     this.bottom_limit=h-2*this.feature_height;
 
+    this.addedEvents=false;
+
     var up_button   = new CanvasButton({x:3, y: top+2,     w: w-6, h: w-6}),
         down_button = new CanvasButton({x:3, y: top+h-w+2, w: w-6, h: w-6});
 
@@ -51,12 +53,12 @@ ActiveSitesPanel = function(options) {
     };
 
     up_button.onClick = function(mouse){
-        self.offsetY = (self.offsetY<self.bottom_limit)?self.bottom_limit:self.offsetY-2;
+        self.offsetY = (self.offsetY<=self.bottom_limit)?self.bottom_limit:self.offsetY-1;
         self.hmm_logo.refresh();
     };
     down_button.onClick = function(mouse){
 //        self.offsetY = (self.offsetY>=self.bottom_limit)?self.bottom_limit:self.offsetY+2;
-        self.offsetY = (self.offsetY>self.top_limit)?self.top_limit:self.offsetY+2;
+        self.offsetY = (self.offsetY>=self.top_limit)?self.top_limit:self.offsetY+1;
         self.hmm_logo.refresh();
     };
     this.getMouse = function (e) {
@@ -84,6 +86,9 @@ ActiveSitesPanel = function(options) {
     };
     this.initialize_2nd_axis = function(second_axis){
         second_axis = this.hmm_logo.render_2nd_y_axis_label();
+        return second_axis;
+    };
+    this.addEvents = function(second_axis){
         second_axis.addEventListener('mousemove', function(e) {
             var mouse = self.getMouse(e),
                 refresh = false;
@@ -99,17 +104,33 @@ ActiveSitesPanel = function(options) {
         });
         second_axis.addEventListener('click', function(e) {
             var mouse = self.getMouse(e);
+//            for (var i=0;i<self.components.length;i++)
+//                self.components[i].click(mouse);
+        });
+        second_axis.addEventListener('mousedown', function(e) {
+            var mouse = self.getMouse(e);
+            self.timer = setInterval( function(){
+                for (var i=0;i<self.components.length;i++)
+                    self.components[i].click(mouse);
+
+            }, 20 );
+
+        });
+        second_axis.addEventListener('mouseup', function(e) {
+            var mouse = self.getMouse(e);
+            clearInterval(self.timer);
             for (var i=0;i<self.components.length;i++)
                 self.components[i].click(mouse);
         });
-        this.bottom_limit = h - Object.keys(self.data).length * (this.feature_height +this.padding_between_tracks)
-        return second_axis;
+        this.bottom_limit = h - (Object.keys(self.data).length+0.5) * (this.feature_height +this.padding_between_tracks)
+        this.addedEvents=true;
     };
     this.paint = function (context_num, start, end) {
         var second_axis = document.getElementById("second_y_axis");
         if (second_axis==null)
             second_axis = this.initialize_2nd_axis();
-
+        if (!this.addedEvents)
+            this.addEvents(second_axis);
         this.canvas = second_axis;
 
         this._paint_2nd_axis(second_axis.getContext('2d'));
@@ -119,6 +140,8 @@ ActiveSitesPanel = function(options) {
             this._paint_column(context_num,i,x);
             x += this.hmm_logo.zoomed_column;
         }
+
+        this.hmm_logo.paint_y_axis_label();
     };
 
     this._paint_2nd_axis = function(context){
@@ -163,9 +186,31 @@ ActiveSitesPanel = function(options) {
         }
     };
     this._paint_background = function(context){
+        draw_box(context, 0, top-1, context.canvas.width, h,
+            "rgba(100,100,100, 0.2)","rgba(100,100,100, 0.0)"
+        );
+    };
+    this.paintLabels = function(context){
         draw_box(context, 0, top, context.canvas.width, h,
             "rgba(100,100,100, 0.2)","rgba(100,100,100, 0.0)"
         );
+        context.fillStyle = "#666666";
+        context.strokeStyle = "#666666";
+        context.textAlign = "right";
+        context.font = "bold 10px Arial";
+        var track =0;
+        for (var j in this.data) {
+            if (this.multiple_tracks)
+                track++;
+            var y1 = self.offsetY + this.margin_to_features + track * (this.padding_between_tracks + this.feature_height);
+            if (top<y1 && y1<top+h-this.feature_height) {
+                context.fillText(
+                    j,
+                    53,
+                    self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height
+                );
+            }
+        }
     };
     function draw_box(context, x, y, width, height, color,border) {
         color = color || "rgba(100,100,100, 0.2)";
