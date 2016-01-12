@@ -16,17 +16,17 @@ ActiveSitesAdder = function(data, hmm_logo) {
     };
 
     this.process = function(){
-        for (var i in this.data){ //for each protein
+        for (var i=0; i<this.data.length;i++) {//for each pattern
             var x = new ActiveSites(this.data[i]);
             this.data[i].controller=x;
-            for (var j=0;j< this.data[i].residues.length;j++) { // for each residue
-                var col = x.getColumnFromResidue(this.data[i].residues[j].residue);
-                if (col > 0 ) {
-                    this.data[i].residues[j].column = col;
-                    this.data[i].residues[j].base = x.sequence[this.data[i].residues[j].residue-1];
-                }
-            }
-            x.sortResidues();
+            //for (var j=0;j< this.data[i].residues.length;j++) { // for each residue
+            //    var col = x.getColumnFromResidue(this.data[i].residues[j].residue);
+            //    if (col > 0 ) {
+            //        this.data[i].residues[j].column = col;
+            //        this.data[i].residues[j].base = x.sequence[this.data[i].residues[j].residue-1];
+            //    }
+            //}
+            x.sortSites();
         }
     };
 

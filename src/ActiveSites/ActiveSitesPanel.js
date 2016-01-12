@@ -10,7 +10,6 @@ ActiveSitesPanel = function(options) {
     this.margin_to_features = options.margin_to_features || 0;
     this.padding_between_tracks = options.padding_between_tracks || 0;
     this.feature_height = options.feature_height || 10;
-    this.multiple_tracks=true;
 
     this.hmm_logo = options.hmm_logo || null;
     this.data = options.data || null;
@@ -34,7 +33,8 @@ ActiveSitesPanel = function(options) {
 
     this.components.push(up_button);
     this.components.push(down_button);
-// create an empty <span>
+
+    // create an empty <span>
     var dragImgEl = document.createElement('span');
     dragImgEl.setAttribute('style',
         'position: absolute; display: block; top: 0; left: 0; width: 0; height: 0;' );
@@ -199,9 +199,8 @@ ActiveSitesPanel = function(options) {
     };
     this._paint_column = function(context_num,i,x) {
         var track =0;
-        for (var j in this.data){
-            if (this.multiple_tracks)
-                track++;
+        for (var j=0; j<this.data.length;j++) {
+            track++;
             var wtd = this.data[j].controller.whatShouldBeDraw(i);
             if (wtd == null)
                 continue;
@@ -239,16 +238,15 @@ ActiveSitesPanel = function(options) {
         context.strokeStyle = "#666666";
         context.textAlign = "right";
         var track =0;
-        for (var j in this.data) {
-            if (this.multiple_tracks)
-                track++;
+        for (var j=0; j<this.data.length;j++) {
+            track++;
             var y1 = self.offsetY + this.margin_to_features + track * (this.padding_between_tracks + this.feature_height);
             if (top<y1 && y1<top+h-this.feature_height) {
                 var y2 =self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height;
                 var fs = 12 - 4*Math.abs(1-(y2-top)/(h/2));
                 context.font = "bold "+fs+"px Arial";
                 context.fillText(
-                    j,
+                    this.data[j].name,
                     53,
                     y2
                 );

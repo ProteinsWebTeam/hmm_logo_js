@@ -1,0 +1,53 @@
+[
+  {
+    "name": "first",
+    "active_sites": [
+      {"column": 5, "base": "N"},
+      {"column": 8, "base": "R"},
+      {"column": 75, "base": "W"}
+    ],
+    "proteins": ["P00030", "P01234", "P01334", "P01238"],
+    "source": "swissprot"
+  },
+  {
+    "name": "second",
+    "active_sites": [
+      {"column": 5, "base": "N"},
+      {"column": 75, "base": "W"}
+    ],
+    "proteins": ["P10030", "P11234", "P11334", "P11238"]
+  },
+  {
+    "name": "third",
+    "active_sites": [
+      {"column": 8, "base": "R"},
+      {"column": 75, "base": "W"}
+    ],
+    "proteins": ["P12030", "P12234", "P12334", "P12238"]
+  },
+  {
+    "name": "forth",
+    "active_sites": [
+      {"column": 5, "base": "N"},
+      {"column": 8, "base": "R"}
+    ],
+    "proteins": ["P12030", "P12234", "P12334", "P12238"]
+  },
+  {
+    "name": "fifth",
+    "active_sites": [
+      {"column": 5, "base": "N"},
+      {"column": 8, "base": "R"},
+      {"column": 75, "base": "L"}
+    ],
+    "proteins": ["Q12030", "Q12234", "Q12334", "Q12238"]
+  },
+  {
+    "name": "sixth",
+    "active_sites": [
+      {"column": 5, "base": "N"},
+      {"column": 75, "base": "L"}
+    ],
+    "proteins": ["Q02030", "Q02234", "Q02334", "Q02238"]
+  }
+]
