@@ -462,13 +462,14 @@ function HMMLogo(options) {
 
     this.render_y_axis_label = function () {
         //attach a canvas for the y-axis
-        $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="302" width="55"></canvas>');
+        $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="302" width="55" draggable="true"></canvas>');
         this.paint_y_axis_label();
     };
 
     this.paint_y_axis_label = function () {
         var canvas = $(this.called_on).find('.logo_yaxis'),
-            context;
+            context,
+            moveTitle=0;
         if (!canvasSupport()) {
             canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
         }
@@ -510,6 +511,7 @@ function HMMLogo(options) {
 
         if (this.show_active_sites && this.active_sites_adder!=null) {
             this.active_sites_adder.panel.paintLabels(context);
+            moveTitle=40;
         }
 
         // draw the axis label
@@ -518,7 +520,7 @@ function HMMLogo(options) {
         }
 
         context.save();
-        context.translate(5, this.height / 2 - 20);
+        context.translate(5, this.height / 2 - 20 + moveTitle);
         context.rotate(-Math.PI / 2);
         context.textAlign = "center";
         context.font = "normal 12px Arial";
@@ -536,7 +538,7 @@ function HMMLogo(options) {
 
     this.render_2nd_y_axis_label = function () {
         //attach a canvas for the y-axis
-        $(this.dom_element).parent().after('<canvas id ="second_y_axis" class="second_yaxis" height="302" width="55"></canvas>');
+        $(this.dom_element).parent().after('<canvas id ="second_y_axis" class="second_yaxis" height="302" width="55" draggable="true"></canvas>');
         var canvas = $(this.called_on).find('.second_yaxis'),
             top_pix_height = 0,
             bottom_pix_height = 0,
@@ -819,16 +821,8 @@ function HMMLogo(options) {
             }
         }
 
-        // reset the rendered counter so that each section will re-render
-        // with the new heights
-        this.rendered = [];
+        this.refresh();
 
-        // re-flow and re-render the content
-        this.scrollme.reflow();
-        //scroll off by one to force a render of the canvas.
-        this.scrollToColumn(col_total + 1);
-        //scroll back to the location we started at.
-        this.scrollToColumn(col_total);
     };
 
     this.toggle_scale = function (scale) {
@@ -849,19 +843,11 @@ function HMMLogo(options) {
                 this.data.max_height = this.data.max_height_obs;
             }
         }
-        // reset the rendered counter so that each section will re-render
-        // with the new heights
-        this.rendered = [];
         //update the y-axis
         $(this.called_on).find('.logo_yaxis').remove();
         this.render_y_axis_label();
 
-        // re-flow and re-render the content
-        this.scrollme.reflow();
-        //scroll off by one to force a render of the canvas.
-        this.scrollToColumn(col_total + 1);
-        //scroll back to the location we started at.
-        this.scrollToColumn(col_total);
+        this.refresh();
     };
 
     this.toggle_ali_map = function (coords) {
@@ -884,16 +870,8 @@ function HMMLogo(options) {
         }
         this.render_x_axis_label();
 
-        // reset the rendered counter so that each section will re-render
-        // with the new heights
-        this.rendered = [];
+        this.refresh();
 
-        // re-flow and re-render the content
-        this.scrollme.reflow();
-        //scroll off by one to force a render of the canvas.
-        this.scrollToColumn(col_total + 1);
-        //scroll back to the location we started at.
-        this.scrollToColumn(col_total);
     };
 
     this.current_column = function () {

@@ -156,6 +156,11 @@ ActiveSitesPanel = function(options) {
 
     this.components.push(up_button);
     this.components.push(down_button);
+// create an empty <span>
+    var dragImgEl = document.createElement('span');
+    dragImgEl.setAttribute('style',
+        'position: absolute; display: block; top: 0; left: 0; width: 0; height: 0;' );
+    document.body.appendChild(dragImgEl);
 
     up_button.draw = function(context){
         draw_polygone(context,[
@@ -174,15 +179,15 @@ ActiveSitesPanel = function(options) {
         );
     };
 
-    up_button.onClick = function(mouse){
+    up_button.onClick = function(){
         self.offsetY = (self.offsetY<=self.bottom_limit)?self.bottom_limit:self.offsetY-1;
         self.hmm_logo.refresh();
     };
-    down_button.onClick = function(mouse){
-//        self.offsetY = (self.offsetY>=self.bottom_limit)?self.bottom_limit:self.offsetY+2;
+    down_button.onClick = function(){
         self.offsetY = (self.offsetY>=self.top_limit)?self.top_limit:self.offsetY+1;
         self.hmm_logo.refresh();
     };
+
     this.getMouse = function (e) {
         var element = this.canvas, offsetX = 0, offsetY = 0, mx, my;
 
@@ -210,7 +215,7 @@ ActiveSitesPanel = function(options) {
         second_axis = this.hmm_logo.render_2nd_y_axis_label();
         return second_axis;
     };
-    this.addEvents = function(second_axis){
+    this.addEvents = function(second_axis,logo_canvas){
         second_axis.addEventListener('mousemove', function(e) {
             var mouse = self.getMouse(e),
                 refresh = false;
@@ -244,6 +249,40 @@ ActiveSitesPanel = function(options) {
             for (var i=0;i<self.components.length;i++)
                 self.components[i].click(mouse);
         });
+        var y_axis = document.getElementsByClassName("logo_yaxis")[0],
+            prevY=null;
+
+
+        y_axis.addEventListener('dragstart', function(e) {
+            //e.dataTransfer.setDragImage(null,0,0);
+
+            e.dataTransfer.setDragImage(dragImgEl, 0, 0);
+            var mouse = self.getMouse(e);
+            if (top< mouse.y && mouse.y<top+h-self.feature_height) {
+                prevY=mouse.y;
+            }
+        });
+
+        y_axis.addEventListener('drag', function(e) {
+            var mouse = self.getMouse(e);
+            if (top< mouse.y && mouse.y<top+h-self.feature_height) {
+                if (prevY!=null) {
+                    var deltaY = mouse.y - prevY;
+                    if (self.offsetY + deltaY>= self.top_limit){
+                        self.offsetY = self.top_limit;
+                    }else if (self.offsetY + deltaY<= self.bottom_limit) {
+                        self.offsetY = self.bottom_limit;
+                    }else
+                        self.offsetY = self.offsetY + deltaY;
+
+                    self.hmm_logo.refresh();
+                }
+                prevY=mouse.y;
+            }
+        });
+        y_axis.addEventListener('dragstart', function(e) {
+            prevY=null;
+        });
         this.bottom_limit = h - (Object.keys(self.data).length+0.5) * (this.feature_height +this.padding_between_tracks)
         this.addedEvents=true;
     };
@@ -251,8 +290,6 @@ ActiveSitesPanel = function(options) {
         var second_axis = document.getElementById("second_y_axis");
         if (second_axis==null)
             second_axis = this.initialize_2nd_axis();
-        if (!this.addedEvents)
-            this.addEvents(second_axis);
         this.canvas = second_axis;
 
         this._paint_2nd_axis(second_axis.getContext('2d'));
@@ -264,6 +301,10 @@ ActiveSitesPanel = function(options) {
         }
 
         this.hmm_logo.paint_y_axis_label();
+
+        if (!this.addedEvents)
+            this.addEvents(second_axis,document.getElementsByClassName("logo_graphic")[0]);
+
     };
 
     this._paint_2nd_axis = function(context){
@@ -319,20 +360,23 @@ ActiveSitesPanel = function(options) {
         context.fillStyle = "#666666";
         context.strokeStyle = "#666666";
         context.textAlign = "right";
-        context.font = "bold 10px Arial";
         var track =0;
         for (var j in this.data) {
             if (this.multiple_tracks)
                 track++;
             var y1 = self.offsetY + this.margin_to_features + track * (this.padding_between_tracks + this.feature_height);
             if (top<y1 && y1<top+h-this.feature_height) {
+                var y2 =self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height;
+                var fs = 12 - 4*Math.abs(1-(y2-top)/(h/2));
+                context.font = "bold "+fs+"px Arial";
                 context.fillText(
                     j,
                     53,
-                    self.offsetY + this.margin_to_features + this.padding_between_tracks * track + (track + 0.5) * this.feature_height
+                    y2
                 );
             }
         }
+        context.font = "bold 10px Arial";
     };
     function draw_box(context, x, y, width, height, color,border) {
         color = color || "rgba(100,100,100, 0.2)";
@@ -1287,13 +1331,14 @@ function HMMLogo(options) {
 
     this.render_y_axis_label = function () {
         //attach a canvas for the y-axis
-        $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="302" width="55"></canvas>');
+        $(this.dom_element).parent().before('<canvas class="logo_yaxis" height="302" width="55" draggable="true"></canvas>');
         this.paint_y_axis_label();
     };
 
     this.paint_y_axis_label = function () {
         var canvas = $(this.called_on).find('.logo_yaxis'),
-            context;
+            context,
+            moveTitle=0;
         if (!canvasSupport()) {
             canvas[0] = G_vmlCanvasManager.initElement(canvas[0]);
         }
@@ -1335,6 +1380,7 @@ function HMMLogo(options) {
 
         if (this.show_active_sites && this.active_sites_adder!=null) {
             this.active_sites_adder.panel.paintLabels(context);
+            moveTitle=40;
         }
 
         // draw the axis label
@@ -1343,7 +1389,7 @@ function HMMLogo(options) {
         }
 
         context.save();
-        context.translate(5, this.height / 2 - 20);
+        context.translate(5, this.height / 2 - 20 + moveTitle);
         context.rotate(-Math.PI / 2);
         context.textAlign = "center";
         context.font = "normal 12px Arial";
@@ -1361,7 +1407,7 @@ function HMMLogo(options) {
 
     this.render_2nd_y_axis_label = function () {
         //attach a canvas for the y-axis
-        $(this.dom_element).parent().after('<canvas id ="second_y_axis" class="second_yaxis" height="302" width="55"></canvas>');
+        $(this.dom_element).parent().after('<canvas id ="second_y_axis" class="second_yaxis" height="302" width="55" draggable="true"></canvas>');
         var canvas = $(this.called_on).find('.second_yaxis'),
             top_pix_height = 0,
             bottom_pix_height = 0,
@@ -1644,16 +1690,8 @@ function HMMLogo(options) {
             }
         }
 
-        // reset the rendered counter so that each section will re-render
-        // with the new heights
-        this.rendered = [];
+        this.refresh();
 
-        // re-flow and re-render the content
-        this.scrollme.reflow();
-        //scroll off by one to force a render of the canvas.
-        this.scrollToColumn(col_total + 1);
-        //scroll back to the location we started at.
-        this.scrollToColumn(col_total);
     };
 
     this.toggle_scale = function (scale) {
@@ -1674,19 +1712,11 @@ function HMMLogo(options) {
                 this.data.max_height = this.data.max_height_obs;
             }
         }
-        // reset the rendered counter so that each section will re-render
-        // with the new heights
-        this.rendered = [];
         //update the y-axis
         $(this.called_on).find('.logo_yaxis').remove();
         this.render_y_axis_label();
 
-        // re-flow and re-render the content
-        this.scrollme.reflow();
-        //scroll off by one to force a render of the canvas.
-        this.scrollToColumn(col_total + 1);
-        //scroll back to the location we started at.
-        this.scrollToColumn(col_total);
+        this.refresh();
     };
 
     this.toggle_ali_map = function (coords) {
@@ -1709,16 +1739,8 @@ function HMMLogo(options) {
         }
         this.render_x_axis_label();
 
-        // reset the rendered counter so that each section will re-render
-        // with the new heights
-        this.rendered = [];
+        this.refresh();
 
-        // re-flow and re-render the content
-        this.scrollme.reflow();
-        //scroll off by one to force a render of the canvas.
-        this.scrollToColumn(col_total + 1);
-        //scroll back to the location we started at.
-        this.scrollToColumn(col_total);
     };
 
     this.current_column = function () {
