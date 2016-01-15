@@ -130,7 +130,6 @@ ActiveSitesPanel = function(options) {
         var y_axis = document.getElementsByClassName("logo_yaxis")[0],
             prevY=null;
 
-
         y_axis.addEventListener('dragstart', function(e) {
             //e.dataTransfer.setDragImage(null,0,0);
 
@@ -161,9 +160,65 @@ ActiveSitesPanel = function(options) {
         y_axis.addEventListener('dragstart', function(e) {
             prevY=null;
         });
+
+        logo_canvas.addEventListener("mousemove",function(evt){
+            var mouse = self.getMouse(evt),
+                box = this.getBoundingClientRect(),
+                offset = box.left + window.pageXOffset - document.documentElement.clientLeft,
+                x = parseInt((evt.pageX - offset), 10),
+                col = self.hmm_logo.columnFromCoordinates(x),
+                track=self.get_track_from_y(mouse.y),
+                refresh=false,
+                clear=false;
+            if (top< mouse.y && mouse.y<top+h){
+                if (typeof self.active_sites_in_canvas[col] != "undefined" && typeof self.active_sites_in_canvas[col][track] != "undefined") {
+                    var site = self.active_sites_in_canvas[col][track];
+                    if (site.controller.over==-1) {
+                        for (var i in self.active_sites_in_canvas)
+                            for (var j in self.active_sites_in_canvas[i])
+                                self.active_sites_in_canvas[i][j].controller.over=-1;
+                        refresh=true;
+                        site.controller.over=col;
+                    }
+                } else
+                    clear = true;
+            }else
+                clear = true;
+            if (clear)
+                for (var i in self.active_sites_in_canvas)
+                    for (var j in self.active_sites_in_canvas[i]) {
+                        if (self.active_sites_in_canvas[i][j].controller.over!=-1)
+                            refresh=true;
+                        self.active_sites_in_canvas[i][j].controller.over = -1;
+                    }
+            if(refresh)
+                self.hmm_logo.refresh();
+        });
+        logo_canvas.addEventListener("click",function(evt){
+            for (var i in self.active_sites_in_canvas)
+                for (var j in self.active_sites_in_canvas[i]) {
+                    var controller = self.active_sites_in_canvas[i][j].controller;
+                    if (controller.over != -1) {
+                        var site_e = document.getElementById("active_site_info");
+                        if (site_e!=null) site_e.innerHTML =
+                            "<h2>Active Site Pattern</h2>" +
+                            "<ul>" +
+                            "   <li><b>Name:</b>"   + controller.name   + "</li>" +
+                            "   <li><b>Source:</b>" + controller.source + "</li>" +
+                            "   <li><b>Sites:</b>" + controller.getSitesHTML(controller.over) + "</li>" +
+                            "   <li><b>Reported Proteins:</b>" + controller.getProteinsHTML(controller.over) + "</li>" +
+                            "</ul>";
+                    }
+                }
+
+        });
         this.bottom_limit = h - (Object.keys(self.data).length+0.5) * (this.feature_height +this.padding_between_tracks)
         this.addedEvents=true;
     };
+    this.get_track_from_y = function(y){
+        return Math.floor((y - self.offsetY - this.margin_to_features)/(this.padding_between_tracks + this.feature_height));
+    };
+    this.active_sites_in_canvas={};
     this.paint = function (context_num, start, end) {
         var second_axis = document.getElementById("second_y_axis");
         if (second_axis==null)
@@ -173,6 +228,7 @@ ActiveSitesPanel = function(options) {
         this._paint_2nd_axis(second_axis.getContext('2d'));
 
         this._paint_background(this.hmm_logo.contexts[context_num]);
+        this.active_sites_in_canvas={};
         for (var i = start,x=0; i <= end; i++) {
             this._paint_column(context_num,i,x);
             x += this.hmm_logo.zoomed_column;
@@ -209,11 +265,15 @@ ActiveSitesPanel = function(options) {
 
             if (top<y1 && y1<top+h-this.feature_height) {
                 if (wtd.type == "BLOCK") {
+                    if (typeof this.active_sites_in_canvas[i] == "undefined")
+                        this.active_sites_in_canvas[i]={};
+                    this.active_sites_in_canvas[i][track]=this.data[j];
                     draw_box(this.hmm_logo.contexts[context_num],
                         x + 1,
                         self.offsetY + this.margin_to_features + track * (this.padding_between_tracks + this.feature_height),
                         this.hmm_logo.zoomed_column - 2,
-                        this.feature_height, color, "#AAA0AF");
+                        this.feature_height, color,
+                        (this.data[j].controller.over==i)?"#000":"#AAA0AF");
                 } else if (wtd.type == "LINE") {
                     draw_line(this.hmm_logo.contexts[context_num],
                         x,
