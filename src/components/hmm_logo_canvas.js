@@ -49,6 +49,8 @@ function HMMLogo(options) {
         this.show_inserts = 1;
         this.info_content_height = 256;
     }
+    this.column_hover = -1;
+    this.column_clicked = -1;
 
 
     if (options.scaled_max) {
@@ -96,7 +98,7 @@ function HMMLogo(options) {
         this.colors = this.aa_colors;
     }
 
-    this.canvas_width = 5000;
+    this.canvas_width = 1000;
 
     var letter = null,
         probs_arr = null,
@@ -130,6 +132,14 @@ function HMMLogo(options) {
     this.rendered = [];
     this.previous_zoom = 0;
 
+    function draw_box(context, x, y, width, height, color,border) {
+        color = color || "rgba(100,100,100, 0.2)";
+        border = border || "rgba(100,100,100, 0.8)";
+        context.fillStyle = color;
+        context.strokeStyle = border;
+        context.fillRect(x, y, width, height);
+        context.strokeRect(x, y, width, height);
+    }
     function draw_small_insert(context, x, y, col_width, in_odds, in_length, del_odds, show_inserts) {
         var fill = "#ffffff";
         if (show_inserts) {
@@ -590,6 +600,16 @@ function HMMLogo(options) {
                         previous_neg_height = top_pix_height,
                         j = 0,
                         color = null;
+                    if (i==this.column_clicked){
+                        this.contexts[context_num].fillStyle = '#ffdede';
+                        this.contexts[context_num].fillRect(x, 0, this.zoomed_column, this.height);
+                        this.contexts[context_num].strokeStyle = '#ff8888';
+                        this.contexts[context_num].strokeRect(x, 0, this.zoomed_column, this.height);
+                    }
+                    if (i==this.column_hover){
+                        this.contexts[context_num].fillStyle = '#ffeeee';
+                        this.contexts[context_num].fillRect(x, 0, this.zoomed_column, this.height);
+                    }
 
                     for (j = 0; j < letters; j++) {
                         var letter = column[j],

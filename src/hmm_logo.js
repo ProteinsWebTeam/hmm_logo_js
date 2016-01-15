@@ -258,6 +258,8 @@ if (typeof module != "undefined")
             i = 0,
             j = 0,
             height_header = 'Probability';
+          hmm_logo.column_clicked = col;
+          hmm_logo.refresh();
 
           if (logo.data.height_calc && logo.data.height_calc === 'score') {
             height_header = 'Score';
@@ -312,6 +314,19 @@ if (typeof module != "undefined")
             .append(info_tab).show();
         });
       }
+
+      logo_graphic.bind('mousemove', function (e) {
+        var hmm_logo = logo,
+            offset = $(this).offset(),
+            x = parseInt((e.pageX - offset.left), 10),
+            col = hmm_logo.columnFromCoordinates(x);
+
+        if (hmm_logo.column_hover!=col){
+          hmm_logo.column_hover = col;
+          hmm_logo.refresh();
+        }
+
+      });
 
       $(document).bind(this.attr('id') + ".scrolledTo", function (e, left, top, zoom) {
         var hmm_logo = logo;
